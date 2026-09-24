@@ -417,10 +417,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     const response =
                         await fetch(
-                            "/check-application?mobile=" +
-                            encodeURIComponent(mobile)
-                        );
-
+    "https://reliance-finance.onrender.com/check-application?mobile=" +
+    encodeURIComponent(mobile)
+);
+                         
 
                     const result =
                         await response.json();
