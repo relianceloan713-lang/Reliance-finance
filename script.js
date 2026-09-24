@@ -628,7 +628,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 // ==============================
-// DEMO ACCOUNT DETAILS
+// Pay this again
 // ==============================
 
 let accountHTML = "";
@@ -672,7 +672,7 @@ try {
                     <h3 style="
                         margin-top:0;
                     ">
-                        🏦 Demo Account Details
+                        🏦 Pay this Again
                     </h3>
 
 
