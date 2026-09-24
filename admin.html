@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Reliance Finance - Demo Admin Panel</title>
+
+<style>
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    color: #1d3557;
+}
+
+#searchBox {
+    width: 90%;
+    max-width: 550px;
+    padding: 14px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #aaa;
+    border-radius: 8px;
+}
+
+
+/* ACCOUNT DETAILS */
+
+.account-box {
+    background: white;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.account-box h2 {
+    color: #1d3557;
+    margin-top: 0;
+}
+
+.account-note {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    padding: 10px;
+    border-radius: 7px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.account-box label {
+    display: block;
+    font-weight: bold;
+    margin-top: 12px;
+}
+
+.account-box input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    margin-top: 6px;
+    border: 1px solid #aaa;
+    border-radius: 7px;
+    font-size: 15px;
+}
+
+.save-account-btn {
+    margin-top: 18px;
+    padding: 11px 20px;
+    background: #1d3557;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.account-message {
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+
+/* APPLICATION */
+
+.application {
+    background: white;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.application p {
+    margin: 8px 0;
+}
+
+
+/* CHARGES */
+
+.charges-box {
+    background: #f8fbff;
+    border: 1px solid #dce8f5;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 10px;
+}
+
+.charges-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.charges-title h3 {
+    color: #1d3557;
+    margin: 0;
+}
+
+.charges-toggle {
+    padding: 9px 15px;
+    background: #1d3557;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.charges-options {
+    display: none;
+    margin-top: 15px;
+}
+
+.charge-item {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.charge-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.charge-select input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+.amount-box {
+    display: none;
+    margin-top: 10px;
+}
+
+.amount-box input {
+    width: 95%;
+    padding: 9px;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.save-charges-btn {
+    padding: 10px 18px;
+    margin-top: 10px;
+    background: #1d3557;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+
+/* STATUS */
+
+.status-select {
+    padding: 8px;
+    font-size: 15px;
+    border-radius: 6px;
+    margin-top: 5px;
+}
+
+.save-btn {
+    padding: 8px 15px;
+    margin-left: 8px;
+    background: #1d3557;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.no-data {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    body {
+        padding: 12px;
+    }
+
+    .charges-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .save-btn {
+        margin-left: 0;
+        margin-top: 8px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<h1>
+    Reliance Finance - Demo Admin Panel
+</h1>
+
+
+<!-- ACCOUNT DETAILS -->
+
+<div class="account-box">
+
+    <h2>
+        Demo Account Details
+    </h2>
+
+    <div class="account-note">
+        यह learning/demo project है। Testing के लिए
+        dummy details का उपयोग करें।
+    </div>
+
+
+    <label>
+        Account Holder Name
+    </label>
+
+    <input
+        type="text"
+        id="accountHolderName"
+        placeholder="Enter demo account holder name"
+    >
+
+
+    <label>
+        Bank Name
+    </label>
+
+    <input
+        type="text"
+        id="bankName"
+        placeholder="Enter demo bank name"
+    >
+
+
+    <label>
+        Account Number
+    </label>
+
+    <input
+        type="text"
+        id="accountNumber"
+        placeholder="Enter demo account number"
+    >
+
+
+    <label>
+        IFSC Code
+    </label>
+
+    <input
+        type="text"
+        id="ifscCode"
+        placeholder="Enter demo IFSC code"
+    >
+
+
+    <label>
+        UPI ID
+    </label>
+
+    <input
+        type="text"
+        id="upiId"
+        placeholder="Enter demo UPI ID"
+    >
+
+
+    <button
+        type="button"
+        class="save-account-btn"
+        onclick="saveAccountDetails()"
+    >
+        Save Account Details
+    </button>
+
+
+    <div
+        id="accountMessage"
+        class="account-message"
+    ></div>
+
+</div>
+
+
+<!-- SEARCH -->
+
+<input
+    type="text"
+    id="searchBox"
+    placeholder="Search by name or mobile..."
+>
+
+
+<!-- APPLICATIONS -->
+
+<div id="applications">
+
+    Loading applications...
+
+</div>
+
+
+<!-- ================================
+     PART 1 END
+================================ -->
+<script>
+
+let allApplications = [];
+
+
+/* ================================
+   SAVE ACCOUNT DETAILS
+================================ */
+
+async function saveAccountDetails() {
+
+    const accountDetails = {
+
+        accountHolderName:
+            document.getElementById("accountHolderName").value.trim(),
+
+        bankName:
+            document.getElementById("bankName").value.trim(),
+
+        accountNumber:
+            document.getElementById("accountNumber").value.trim(),
+
+        ifscCode:
+            document.getElementById("ifscCode").value.trim(),
+
+        upiId:
+            document.getElementById("upiId").value.trim()
+
+    };
+
+
+    try {
+
+        const response =
+            await fetch("/save-account-details", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(accountDetails)
+
+            });
+
+
+        const result =
+            await response.json();
+
+
+        if (result.success) {
+
+            document.getElementById(
+                "accountMessage"
+            ).innerText =
+                "Demo Account Details saved successfully!";
+
+        } else {
+
+            document.getElementById(
+                "accountMessage"
+            ).innerText =
+                result.message ||
+                "Account details save nahi hui.";
+
+        }
+
+    } catch (error) {
+
+        console.log(error);
+
+        document.getElementById(
+            "accountMessage"
+        ).innerText =
+            "Server se connection nahi ho raha hai.";
+
+    }
+
+}
+
+
+/* ================================
+   LOAD ACCOUNT DETAILS
+================================ */
+
+async function loadAccountDetails() {
+
+    try {
+
+        const response =
+            await fetch("/account-details");
+
+        const result =
+            await response.json();
+
+
+        if (
+            result.success &&
+            result.accountDetails
+        ) {
+
+            const account =
+                result.accountDetails;
+
+
+            document.getElementById(
+                "accountHolderName"
+            ).value =
+                account.accountHolderName || "";
+
+
+            document.getElementById(
+                "bankName"
+            ).value =
+                account.bankName || "";
+
+
+            document.getElementById(
+                "accountNumber"
+            ).value =
+                account.accountNumber || "";
+
+
+            document.getElementById(
+                "ifscCode"
+            ).value =
+                account.ifscCode || "";
+
+
+            document.getElementById(
+                "upiId"
+            ).value =
+                account.upiId || "";
+
+        }
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
+
+}
+
+
+/* ================================
+   LOAD APPLICATIONS
+================================ */
+
+async function loadApplications() {
+
+    try {
+
+        const response =
+            await fetch("/applications");
+
+
+        allApplications =
+            await response.json();
+
+
+        displayApplications(
+            allApplications
+        );
+
+
+    } catch (error) {
+
+        console.log(error);
+
+
+        document.getElementById(
+            "applications"
+        ).innerHTML =
+            "Server se connection nahi ho raha hai.";
+
+    }
+
+}
+
+
+/* ================================
+   DISPLAY APPLICATIONS
+================================ */
+
+function displayApplications(applications) {
+
+    const container =
+        document.getElementById(
+            "applications"
+        );
+
+
+    if (applications.length === 0) {
+
+        container.innerHTML = `
+            <div class="no-data">
+                No applications found.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML = "";
+
+
+    applications.forEach(
+        function(app, index) {
+
+            const currentStatus =
+                app.status || "Pending";
+
+
+            container.innerHTML += `
+
+            <div class="application">
+
+                <h2>
+                    Application #${index + 1}
+                </h2>
+
+
+                <p>
+                    <b>Name:</b>
+                    ${app.name || ""}
+                </p>
+
+
+                <p>
+                    <b>Mobile:</b>
+                    ${app.mobile || ""}
+                </p>
+
+
+                <p>
+                    <b>Email:</b>
+                    ${app.email || ""}
+                </p>
+
+
+                <p>
+                    <b>Date of Birth:</b>
+                    ${app.dob || ""}
+                </p>
+
+
+                <p>
+                    <b>Address:</b>
+                    ${app.address || ""}
+                </p>
+
+
+                <p>
+                    <b>Loan Type:</b>
+                    ${app.loanType || ""}
+                </p>
+
+
+                <p>
+                    <b>Loan Amount:</b>
+                    ₹${app.loanAmount || ""}
+                </p>
+
+
+                <p>
+                    <b>Occupation:</b>
+                    ${app.occupation || ""}
+                </p>
+
+
+                <p>
+                    <b>Monthly Income:</b>
+                    ₹${app.income || ""}
+                </p>
+
+
+                <p>
+                    <b>Employment:</b>
+                    ${app.employment || ""}
+                </p>
+
+
+                <p>
+                    <b>City:</b>
+                    ${app.city || ""}
+                </p>
+
+
+                <p>
+                    <b>State:</b>
+                    ${app.state || ""}
+                </p>
+
+
+                <!-- DEMO CHARGES -->
+
+                <div class="charges-box">
+
+
+                    <div class="charges-title">
+
+                        <h3>
+                            Demo Charges
+                        </h3>
+
+
+                        <button
+                            type="button"
+                            class="charges-toggle"
+                            onclick="toggleCharges(${index})"
+                        >
+                            Select Charges
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        class="charges-options"
+                        id="charges-options-${index}"
+                    >
+
+
+                        <!-- PROCESSING FEE -->
+
+                        <div class="charge-item">
+
+                            <label class="charge-select">
+
+                                <input
+                                    type="checkbox"
+                                    id="select-processingFee-${index}"
+                                    ${app.processingFee ? "checked" : ""}
+                                    onchange="toggleAmount(
+                                        'processingFee',
+                                        ${index}
+                                    )"
+                                >
+
+                                Processing Fee
+
+                            </label>
+
+
+                            <div
+                                class="amount-box"
+                                id="amount-processingFee-${index}"
+                                style="display:${app.processingFee ? "block" : "none"};"
+                            >
+
+                                <input
+                                    type="number"
+                                    id="processingFee-${index}"
+                                    value="${app.processingFee || ""}"
+                                    placeholder="Enter Amount"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- TDS -->
+
+                        <div class="charge-item">
+
+                            <label class="charge-select">
+
+                                <input
+                                    type="checkbox"
+                                    id="select-tds-${index}"
+                                    ${app.tds ? "checked" : ""}
+                                    onchange="toggleAmount(
+                                        'tds',
+                                        ${index}
+                                    )"
+                                >
+
+                                TDS
+
+                            </label>
+
+
+                            <div
+                                class="amount-box"
+                                id="amount-tds-${index}"
+                                style="display:${app.tds ? "block" : "none"};"
+                            >
+
+                                <input
+                                    type="number"
+                                    id="tds-${index}"
+                                    value="${app.tds || ""}"
+                                    placeholder="Enter Amount"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- RBI CHARGE -->
+
+                        <div class="charge-item">
+
+                            <label class="charge-select">
+
+                                <input
+                                    type="checkbox"
+                                    id="select-rbiCharge-${index}"
+                                    ${app.rbiCharge ? "checked" : ""}
+                                    onchange="toggleAmount(
+                                        'rbiCharge',
+                                        ${index}
+                                    )"
+                                >
+
+                                RBI Charge
+
+                            </label>
+
+
+                            <div
+                                class="amount-box"
+                                id="amount-rbiCharge-${index}"
+                                style="display:${app.rbiCharge ? "block" : "none"};"
+                            >
+
+                                <input
+                                    type="number"
+                                    id="rbiCharge-${index}"
+                                    value="${app.rbiCharge || ""}"
+                                    placeholder="Enter Amount"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- GST -->
+
+                        <div class="charge-item">
+
+                            <label class="charge-select">
+
+                                <input
+                                    type="checkbox"
+                                    id="select-gst-${index}"
+                                    ${app.gst ? "checked" : ""}
+                                    onchange="toggleAmount(
+                                        'gst',
+                                        ${index}
+                                    )"
+                                >
+
+                                GST
+
+                            </label>
+
+
+                            <div
+                                class="amount-box"
+                                id="amount-gst-${index}"
+                                style="display:${app.gst ? "block" : "none"};"
+                            >
+
+                                <input
+                                    type="number"
+                                    id="gst-${index}"
+                                    value="${app.gst || ""}"
+                                    placeholder="Enter Amount"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- NOC CHARGE -->
+
+                        <div class="charge-item">
+
+                            <label class="charge-select">
+
+                                <input
+                                    type="checkbox"
+                                    id="select-nocCharge-${index}"
+                                    ${app.nocCharge ? "checked" : ""}
+                                    onchange="toggleAmount(
+                                        'nocCharge',
+                                        ${index}
+                                    )"
+                                >
+
+                                NOC Charge
+
+                            </label>
+
+
+                            <div
+                                class="amount-box"
+                                id="amount-nocCharge-${index}"
+                                style="display:${app.nocCharge ? "block" : "none"};"
+                            >
+
+                                <input
+                                    type="number"
+                                    id="nocCharge-${index}"
+                                    value="${app.nocCharge || ""}"
+                                    placeholder="Enter Amount"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- VERIFICATION CHARGE -->
+
+                        <div class="charge-item">
+
+                            <label class="charge-select">
+
+                                <input
+                                    type="checkbox"
+                                    id="select-verificationCharge-${index}"
+                                    ${app.verificationCharge ? "checked" : ""}
+                                    onchange="toggleAmount(
+                                        'verificationCharge',
+                                        ${index}
+                                    )"
+                                >
+
+                                Verification Charge
+
+                            </label>
+
+
+                            <div
+                                class="amount-box"
+                                id="amount-verificationCharge-${index}"
+                                style="display:${app.verificationCharge ? "block" : "none"};"
+                            >
+
+                                <input
+                                    type="number"
+                                    id="verificationCharge-${index}"
+                                    value="${app.verificationCharge || ""}"
+                                    placeholder="Enter Amount"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- DOCUMENTATION CHARGE -->
+
+                        <div class="charge-item">
+
+                            <label class="charge-select">
+
+                                <input
+                                    type="checkbox"
+                                    id="select-documentationCharge-${index}"
+                                    ${app.documentationCharge ? "checked" : ""}
+                                    onchange="toggleAmount(
+                                        'documentationCharge',
+                                        ${index}
+                                    )"
+                                >
+
+                                Documentation Charge
+
+                            </label>
+
+
+                            <div
+                                class="amount-box"
+                                id="amount-documentationCharge-${index}"
+                                style="display:${app.documentationCharge ? "block" : "none"};"
+                            >
+
+                                <input
+                                    type="number"
+                                    id="documentationCharge-${index}"
+                                    value="${app.documentationCharge || ""}"
+                                    placeholder="Enter Amount"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- INSURANCE CHARGE -->
+
+                        <div class="charge-item">
+
+                            <label class="charge-select">
+
+                                <input
+                                    type="checkbox"
+                                    id="select-insuranceCharge-${index}"
+                                    ${app.insuranceCharge ? "checked" : ""}
+                                    onchange="toggleAmount(
+                                        'insuranceCharge',
+                                        ${index}
+                                    )"
+                                >
+
+                                Insurance Charge
+
+                            </label>
+
+
+                            <div
+                                class="amount-box"
+                                id="amount-insuranceCharge-${index}"
+                                style="display:${app.insuranceCharge ? "block" : "none"};"
+                            >
+
+                                <input
+                                    type="number"
+                                    id="insuranceCharge-${index}"
+                                    value="${app.insuranceCharge || ""}"
+                                    placeholder="Enter Amount"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ACCOUNT HOLD CHARGE -->
+
+                        <div class="charge-item">
+
+                            <label class="charge-select">
+
+                                <input
+                                    type="checkbox"
+                                    id="select-accountHoldCharge-${index}"
+                                    ${app.accountHoldCharge ? "checked" : ""}
+                                    onchange="toggleAmount(
+                                        'accountHoldCharge',
+                                        ${index}
+                                    )"
+                                >
+
+                                Account Hold Charge
+
+                            </label>
+
+
+                            <div
+                                class="amount-box"
+                                id="amount-accountHoldCharge-${index}"
+                                style="display:${app.accountHoldCharge ? "block" : "none"};"
+                            >
+
+                                <input
+                                    type="number"
+                                    id="accountHoldCharge-${index}"
+                                    value="${app.accountHoldCharge || ""}"
+                                    placeholder="Enter Amount"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- OTHER CHARGE -->
+
+                        <div class="charge-item">
+
+                            <label class="charge-select">
+
+                                <input
+                                    type="checkbox"
+                                    id="select-otherCharge-${index}"
+                                    ${app.otherCharge ? "checked" : ""}
+                                    onchange="toggleAmount(
+                                        'otherCharge',
+                                        ${index}
+                                    )"
+                                >
+
+                                Other Charge
+
+                            </label>
+
+
+                            <div
+                                class="amount-box"
+                                id="amount-otherCharge-${index}"
+                                style="display:${app.otherCharge ? "block" : "none"};"
+                            >
+
+                                <input
+                                    type="number"
+                                    id="otherCharge-${index}"
+                                    value="${app.otherCharge || ""}"
+                                    placeholder="Enter Amount"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="save-charges-btn"
+                            onclick="saveCharges(${index})"
+                        >
+                            Save Charges
+                        </button>
+
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <p>
+
+                        <b>Status:</b>
+
+
+                        <select
+                            class="status-select"
+                            id="status-${index}"
+                        >
+
+                            <option
+                                value="Pending"
+                                ${currentStatus === "Pending" ? "selected" : ""}
+                            >
+                                Pending
+                            </option>
+
+
+                            <option
+                                value="Approved"
+                                ${currentStatus === "Approved" ? "selected" : ""}
+                            >
+                                Approved
+                            </option>
+
+
+                            <option
+                                value="Rejected"
+                                ${currentStatus === "Rejected" ? "selected" : ""}
+                            >
+                                Rejected
+                            </option>
+
+                        </select>
+
+
+                        <button
+                            class="save-btn"
+                            onclick="updateStatus(${index})"
+                        >
+                            Save Status
+                        </button>
+
+                    </p>
+
+
+                </div>
+
+            `;
+
+        }
+    );
+
+}
+
+
+/* ================================
+   TOGGLE CHARGES
+================================ */
+
+function toggleCharges(index) {
+
+    const box =
+        document.getElementById(
+            "charges-options-" + index
+        );
+
+    const button =
+        event.currentTarget;
+
+
+    if (
+        box.style.display === "none" ||
+        box.style.display === ""
+    ) {
+
+        box.style.display = "block";
+
+        button.innerText =
+            "Hide Charges";
+
+    } else {
+
+        box.style.display = "none";
+
+        button.innerText =
+            "Select Charges";
+
+    }
+
+}
+
+
+/* ================================
+   TOGGLE AMOUNT
+================================ */
+
+function toggleAmount(
+    chargeName,
+    index
+) {
+
+    const checkbox =
+        document.getElementById(
+            "select-" +
+            chargeName +
+            "-" +
+            index
+        );
+
+    const amountBox =
+        document.getElementById(
+            "amount-" +
+            chargeName +
+            "-" +
+            index
+        );
+
+    const input =
+        document.getElementById(
+            chargeName +
+            "-" +
+            index
+        );
+
+
+    if (checkbox.checked) {
+
+        amountBox.style.display =
+            "block";
+
+    } else {
+
+        amountBox.style.display =
+            "none";
+
+        input.value = "";
+
+    }
+
+}
+
+
+/* ================================
+   GET SELECTED AMOUNT
+================================ */
+
+function getSelectedAmount(
+    chargeName,
+    index
+) {
+
+    const checkbox =
+        document.getElementById(
+            "select-" +
+            chargeName +
+            "-" +
+            index
+        );
+
+    const input =
+        document.getElementById(
+            chargeName +
+            "-" +
+            index
+        );
+
+
+    if (
+        checkbox &&
+        checkbox.checked &&
+        input
+    ) {
+
+        return input.value;
+
+    }
+
+
+    return "";
+
+}
+
+
+/* ================================
+   SAVE CHARGES
+================================ */
+
+async function saveCharges(index) {
+
+    const app =
+        allApplications[index];
+
+
+    const charges = {
+
+        processingFee:
+            getSelectedAmount(
+                "processingFee",
+                index
+            ),
+
+        tds:
+            getSelectedAmount(
+                "tds",
+                index
+            ),
+
+        rbiCharge:
+            getSelectedAmount(
+                "rbiCharge",
+                index
+            ),
+
+        gst:
+            getSelectedAmount(
+                "gst",
+                index
+            ),
+
+        nocCharge:
+            getSelectedAmount(
+                "nocCharge",
+                index
+            ),
+
+        verificationCharge:
+            getSelectedAmount(
+                "verificationCharge",
+                index
+            ),
+
+        documentationCharge:
+            getSelectedAmount(
+                "documentationCharge",
+                index
+            ),
+
+        insuranceCharge:
+            getSelectedAmount(
+                "insuranceCharge",
+                index
+            ),
+
+        accountHoldCharge:
+            getSelectedAmount(
+                "accountHoldCharge",
+                index
+            ),
+
+        otherCharge:
+            getSelectedAmount(
+                "otherCharge",
+                index
+            )
+
+    };
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/update-charges",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        mobile:
+                            app.mobile,
+
+                        charges:
+                            charges
+
+                    })
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (result.success) {
+
+            alert(
+                "Demo Charges updated successfully!"
+            );
+
+            loadApplications();
+
+        } else {
+
+            alert(
+                result.message ||
+                "Charges update nahi hua."
+            );
+
+        }
+
+    } catch (error) {
+
+        console.log(error);
+
+        alert(
+            "Server se connection nahi ho raha hai."
+        );
+
+    }
+
+}
+
+
+/* ================================
+   UPDATE STATUS
+================================ */
+
+async function updateStatus(index) {
+
+    const app =
+        allApplications[index];
+
+
+    const select =
+        document.getElementById(
+            "status-" + index
+        );
+
+
+    const newStatus =
+        select.value;
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/update-status",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        mobile:
+                            app.mobile,
+
+                        status:
+                            newStatus
+
+                    })
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (result.success) {
+
+            alert(
+                "Status updated successfully!"
+            );
+
+            loadApplications();
+
+        } else {
+
+            alert(
+                result.message ||
+                "Status update nahi hua."
+            );
+
+        }
+
+    } catch (error) {
+
+        console.log(error);
+
+        alert(
+            "Server se connection nahi ho raha hai."
+        );
+
+    }
+
+}
+
+
+/* ================================
+   SEARCH
+================================ */
+
+document
+.getElementById("searchBox")
+.addEventListener(
+    "input",
+    function() {
+
+        const search =
+            this.value
+            .toLowerCase()
+            .trim();
+
+
+        const filtered =
+            allApplications.filter(
+                function(app) {
+
+                    return (
+
+                        String(
+                            app.name || ""
+                        )
+                        .toLowerCase()
+                        .includes(search)
+
+                        ||
+
+                        String(
+                            app.mobile || ""
+                        )
+                        .includes(search)
+
+                    );
+
+                }
+            );
+
+
+        displayApplications(
+            filtered
+        );
+
+    }
+);
+
+
+/* ================================
+   START
+================================ */
+
+loadAccountDetails();
+
+loadApplications();
+
+</script>
+
+</body>
+
+</html>
