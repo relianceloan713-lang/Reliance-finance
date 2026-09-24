@@ -249,7 +249,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     const response =
                         await fetch(
-                            "/submit-application",
+                            "https://reliance-finance.onrender.com/submit-application",
                             {
                                 method: "POST",
 
