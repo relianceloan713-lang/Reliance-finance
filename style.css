@@ -1,0 +1,501 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f3f7ff;
+    color: #172033;
+}
+
+/* HEADER */
+
+header {
+    height: 80px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 6%;
+    border-bottom: 3px solid #1765c0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-circle {
+    width: 52px;
+    height: 52px;
+    background: #1765c0;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.logo b {
+    display: block;
+    color: #1765c0;
+    font-size: 22px;
+}
+
+.logo span {
+    color: #1765c0;
+    font-size: 13px;
+    letter-spacing: 3px;
+}
+
+#menuBtn {
+    background: none;
+    border: none;
+    font-size: 32px;
+    cursor: pointer;
+}
+
+
+/* HERO */
+
+.hero {
+    min-height: 550px;
+    padding: 80px 7%;
+    color: white;
+    background: linear-gradient(135deg, #0b2b61, #1685e8);
+}
+
+.trusted {
+    display: inline-block;
+    padding: 12px 20px;
+    border: 1px solid #8ab9e8;
+    border-radius: 30px;
+    margin-bottom: 25px;
+}
+
+.hero h1 {
+    font-size: 50px;
+    max-width: 750px;
+    line-height: 1.15;
+}
+
+.hero h1 span {
+    display: block;
+    color: #8bc5ff;
+}
+
+.hero p {
+    max-width: 650px;
+    font-size: 20px;
+    line-height: 1.6;
+    margin: 25px 0;
+}
+
+
+/* BUTTONS */
+
+.apply-btn,
+.status-btn {
+    width: 300px;
+    padding: 17px;
+    margin: 7px 0;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.apply-btn {
+    background: #ff7200;
+    color: white;
+    border: none;
+}
+
+.status-btn {
+    background: transparent;
+    color: white;
+    border: 2px solid #9bc9f4;
+}
+
+
+/* LOAN MODAL */
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    z-index: 1000;
+}
+
+
+/* APPLICATION BOX */
+
+.application-box {
+    background: white;
+    width: 100%;
+    max-width: 630px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 25px;
+}
+
+
+/* APPLICATION HEADER */
+
+.application-header {
+    background: linear-gradient(135deg, #0b2b61, #176bd0);
+    color: white;
+    padding: 22px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.application-header h2 {
+    font-size: 25px;
+}
+
+#closeBtn {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: none;
+    font-size: 35px;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+
+/* STEPS */
+
+.steps {
+    display: flex;
+    justify-content: space-around;
+    padding: 28px 35px;
+    border-bottom: 1px solid #ddd;
+}
+
+.steps span {
+    width: 45px;
+    height: 45px;
+    border: 3px solid #e0e5ec;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.steps .active-step {
+    background: #1765c0;
+    color: white;
+    border-color: #1765c0;
+}
+
+
+/* FORM */
+
+#loanForm,
+#loanForm2,
+#loanForm3 {
+    padding: 25px 30px 35px;
+}
+
+#loanForm label,
+#loanForm2 label,
+#loanForm3 label {
+    display: block;
+    margin: 18px 0 8px;
+    font-weight: bold;
+}
+
+#loanForm input,
+#loanForm textarea,
+#loanForm2 input,
+#loanForm3 input {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #e0e5eb;
+    border-radius: 12px;
+    font-size: 16px;
+    outline: none;
+}
+
+#loanForm textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+#loanForm input:focus,
+#loanForm textarea:focus,
+#loanForm2 input:focus,
+#loanForm3 input:focus {
+    border-color: #1765c0;
+}
+
+
+/* CONTINUE BUTTON */
+
+.continue-btn {
+    width: 100%;
+    margin-top: 25px;
+    padding: 17px;
+    background: #1765c0;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.continue-btn:hover {
+    background: #0b4f9c;
+}
+
+
+/* CHECK STATUS MODAL */
+
+.status-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    z-index: 1100;
+}
+
+.status-box {
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    border-radius: 22px;
+    overflow: hidden;
+}
+
+.status-header {
+    background: linear-gradient(135deg, #0b2b61, #176bd0);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-header h2 {
+    font-size: 22px;
+}
+
+#closeStatusBtn {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 32px;
+    cursor: pointer;
+}
+
+.status-content {
+    padding: 25px;
+}
+
+.status-content label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+#statusMobile {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #e0e5eb;
+    border-radius: 12px;
+    font-size: 16px;
+    outline: none;
+}
+
+#statusMobile:focus {
+    border-color: #1765c0;
+}
+
+
+/* STATUS BUTTON */
+
+#checkStatusBtn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 15px;
+    background: #1765c0;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+
+/* STATUS RESULT */
+
+.status-card {
+    background: #f8fbff;
+    border: 1px solid #dce8f5;
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.status-card p {
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+.status-success {
+    color: green;
+    font-weight: bold;
+}
+
+.status-error {
+    color: red;
+    font-weight: bold;
+}
+
+
+/* STATUS COLORS */
+
+.status-pending {
+    color: orange;
+    font-weight: bold;
+}
+
+.status-approved {
+    color: green;
+    font-weight: bold;
+}
+
+.status-rejected {
+    color: red;
+    font-weight: bold;
+}
+
+
+/* FOOTER */
+
+footer {
+    background: #0b2b61;
+    color: white;
+    text-align: center;
+    padding: 25px;
+    margin-top: 40px;
+}
+
+
+/* RESPONSIVE DESIGN */
+
+@media (max-width: 768px) {
+
+    header {
+        height: auto;
+        padding: 15px 5%;
+    }
+
+    .hero {
+        min-height: 500px;
+        padding: 55px 6%;
+    }
+
+    .hero h1 {
+        font-size: 35px;
+    }
+
+    .hero p {
+        font-size: 17px;
+    }
+
+    .apply-btn,
+    .status-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .application-header h2 {
+        font-size: 20px;
+    }
+
+    #loanForm,
+    #loanForm2,
+    #loanForm3 {
+        padding: 20px;
+    }
+
+    .steps {
+        padding: 20px 10px;
+    }
+
+    .status-content {
+        padding: 20px;
+    }
+
+}
+.status-card {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-bottom: 25px;
+}
+
+.status-approved,
+.status-pending,
+.status-rejected {
+    display: inline-block;
+    margin-left: 5px;
+    font-weight: bold;
+}
+.loan-links {
+    text-align: center;
+    padding: 35px 20px;
+    background: #f5f7fa;
+}
+
+.loan-links h2 {
+    color: #1d3557;
+    margin-bottom: 20px;
+}
+
+.loan-links a {
+    display: inline-block;
+    background: #1d3557;
+    color: white;
+    text-decoration: none;
+    padding: 12px 18px;
+    margin: 6px;
+    border-radius: 8px;
+}
+
+.loan-links a:hover {
+    background: #457b9d;
+}
+
+@media (max-width: 600px) {
+
+    .loan-links a {
+        display: block;
+        margin: 10px auto;
+        max-width: 280px;
+    }
+
+}

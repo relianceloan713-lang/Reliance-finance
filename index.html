@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Finance - Demo</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* LOAN MENU */
+
+        header {
+            position: relative;
+        }
+
+        #loanMenu {
+            display: none;
+            position: absolute;
+            top: 75px;
+            right: 6%;
+            width: 230px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+            overflow: hidden;
+            z-index: 2000;
+        }
+
+        #loanMenu.show {
+            display: block;
+        }
+
+        #loanMenu a {
+            display: block;
+            padding: 15px 18px;
+            color: #172033;
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            font-weight: bold;
+        }
+
+        #loanMenu a:hover {
+            background: #f3f7ff;
+            color: #1765c0;
+        }
+
+        @media (max-width: 600px) {
+            #loanMenu {
+                right: 5%;
+                width: 90%;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+<!-- HEADER -->
+
+<header>
+
+    <div class="logo">
+
+        <div class="logo-circle">
+            S
+        </div>
+
+        <div>
+            <b>Reliance</b>
+            <span>FINANCE</span>
+        </div>
+
+    </div>
+
+
+    <button id="menuBtn">
+        ☰
+    </button>
+
+
+    <!-- LOAN MENU -->
+
+    <div id="loanMenu">
+
+        <a href="personal-loan.html">
+            Personal Loan
+        </a>
+
+        <a href="business-loan.html">
+            Business Loan
+        </a>
+
+        <a href="education-loan.html">
+            Education Loan
+        </a>
+
+        <a href="home-loan.html">
+            Home Loan
+        </a>
+
+    </div>
+
+</header>
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+    <div class="trusted">
+        🟢 Reliance Financial Services
+    </div>
+
+
+    <h1>
+        Smart Loans for
+        <span>
+            Every Indian Dream
+        </span>
+    </h1>
+
+
+    <p>
+        Easy loan application with a simple
+        and transparent demo process.
+    </p>
+
+
+    <button
+        class="apply-btn"
+        id="applyBtn"
+    >
+        Apply Now →
+    </button>
+
+
+    <button
+        class="status-btn"
+        id="statusBtn"
+    >
+        Check My Status
+    </button>
+
+</section>
+
+
+<!-- CHECK STATUS -->
+
+<div
+    class="status-modal"
+    id="statusModal"
+>
+
+    <div class="status-box">
+
+        <div class="status-header">
+
+            <h2>
+                📋 Application Status
+            </h2>
+
+            <button id="closeStatusBtn">
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="status-content">
+
+            <label>
+                Enter Mobile Number
+            </label>
+
+
+            <input
+                type="tel"
+                id="statusMobile"
+                placeholder="Enter 10-digit mobile number"
+                maxlength="10"
+            >
+
+
+            <button id="checkStatusBtn">
+                Check Status
+            </button>
+
+
+            <div id="statusResult"></div>
+            <div
+    id="accountDetailsResult"
+    style="display:none; margin-top:20px;"
+>
+</div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- LOAN APPLICATION -->
+
+<div
+    class="modal"
+    id="loanModal"
+>
+
+    <div class="application-box">
+
+
+        <!-- APPLICATION HEADER -->
+
+        <div class="application-header">
+
+            <h2>
+                🏦 Loan Application
+            </h2>
+
+
+            <button id="closeBtn">
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- STEPS -->
+
+        <div class="steps">
+
+            <span
+                id="step1"
+                class="active-step"
+            >
+                1
+            </span>
+
+            <span id="step2">
+                2
+            </span>
+
+            <span id="step3">
+                3
+            </span>
+
+            <span id="step4">
+                4
+            </span>
+
+        </div>
+
+
+        <!-- STEP 1 -->
+
+        <div id="formStep1">
+
+            <h2 style="padding:20px 30px 0;">
+                👤 Personal Information
+            </h2>
+
+
+            <form id="loanForm">
+
+                <label>
+                    Full Name *
+                </label>
+
+                <input
+                    type="text"
+                    id="name"
+                    placeholder="Enter full name"
+                    required
+                >
+
+
+                <label>
+                    Date of Birth *
+                </label>
+
+                <input
+                    type="date"
+                    id="dob"
+                    required
+                >
+
+
+                <label>
+                    Mobile Number *
+                </label>
+
+                <input
+                    type="tel"
+                    id="mobile"
+                    placeholder="10-digit number"
+                    maxlength="10"
+                    required
+                >
+
+
+                <label>
+                    Email Address *
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="your@email.com"
+                    required
+                >
+
+
+                <label>
+                    Full Address *
+                </label>
+
+                <textarea
+                    id="address"
+                    placeholder="House No, Street, City, State, PIN"
+                    required
+                ></textarea>
+
+
+                <button
+                    type="submit"
+                    class="continue-btn"
+                >
+                    Continue →
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- STEP 2 -->
+
+        <div
+            id="formStep2"
+            style="display:none;"
+        >
+
+            <h2 style="padding:20px 30px 0;">
+                💰 Loan Information
+            </h2>
+
+
+            <form id="loanForm2">
+
+                <label>
+                    Loan Type *
+                </label>
+
+
+                <select
+                    id="loanType"
+                    required
+                    style="width:100%;padding:16px;border:2px solid #e0e5eb;border-radius:12px;font-size:16px;"
+                >
+
+                    <option value="">
+                        Select Loan Type
+                    </option>
+
+                    <option>
+                        Personal Loan
+                    </option>
+
+                    <option>
+                        Business Loan
+                    </option>
+
+                    <option>
+                        Education Loan
+                    </option>
+
+                    <option>
+                        Home Loan
+                    </option>
+
+                </select>
+
+
+                <label>
+                    Required Loan Amount *
+                </label>
+
+
+                <input
+                    type="number"
+                    id="loanAmount"
+                    placeholder="Enter amount"
+                    required
+                >
+
+
+                <label>
+                    Occupation *
+                </label>
+
+
+                <input
+                    type="text"
+                    id="occupation"
+                    placeholder="Enter occupation"
+                    required
+                >
+
+
+                <label>
+                    Monthly Income *
+                </label>
+
+
+                <input
+                    type="number"
+                    id="income"
+                    placeholder="Enter monthly income"
+                    required
+                >
+
+
+                <button
+                    type="submit"
+                    class="continue-btn"
+                >
+                    Continue →
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- STEP 3 -->
+
+        <div
+            id="formStep3"
+            style="display:none;"
+        >
+
+            <h2 style="padding:20px 30px 0;">
+                💼 Work Information
+            </h2>
+
+
+            <form id="loanForm3">
+
+                <label>
+                    Employment Type *
+                </label>
+
+
+                <input
+                    type="text"
+                    id="employment"
+                    placeholder="Job / Business"
+                    required
+                >
+
+
+                <label>
+                    City *
+                </label>
+
+
+                <input
+                    type="text"
+                    id="city"
+                    placeholder="Enter city"
+                    required
+                >
+
+
+                <label>
+                    State *
+                </label>
+
+
+                <input
+                    type="text"
+                    id="state"
+                    placeholder="Enter state"
+                    required
+                >
+
+
+                <button
+                    type="submit"
+                    class="continue-btn"
+                >
+                    Continue →
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- STEP 4 -->
+
+        <div
+            id="formStep4"
+            style="display:none;"
+        >
+
+            <h2 style="padding:20px 30px 0;">
+                📋 Application Review
+            </h2>
+
+
+            <div
+                id="reviewDetails"
+                style="padding:10px 30px;"
+            >
+            </div>
+
+
+            <button
+                type="button"
+                class="continue-btn"
+                id="submitApplication"
+            >
+                Submit Application
+            </button>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<!-- MENU SCRIPT -->
+
+<script>
+
+    const menuBtn =
+        document.getElementById("menuBtn");
+
+    const loanMenu =
+        document.getElementById("loanMenu");
+
+
+    menuBtn.addEventListener(
+        "click",
+        function () {
+
+            loanMenu.classList.toggle("show");
+
+        }
+    );
+
+
+    document.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                !menuBtn.contains(event.target) &&
+                !loanMenu.contains(event.target)
+            ) {
+
+                loanMenu.classList.remove("show");
+
+            }
+
+        }
+    );
+
+</script>
+
+
+<!-- MAIN PROJECT SCRIPT -->
+
+<script src="script.js?v=3"></script>
+
+
+<!-- OPEN APPLY / STATUS FROM LOAN PAGES -->
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+
+            if (params.get("open") === "apply") {
+
+                const applyBtn =
+                    document.getElementById("applyBtn");
+
+                if (applyBtn) {
+                    applyBtn.click();
+                }
+
+            }
+
+
+            if (params.get("open") === "status") {
+
+                const statusBtn =
+                    document.getElementById("statusBtn");
+
+                if (statusBtn) {
+                    statusBtn.click();
+                }
+
+            }
+
+        }
+    );
+
+</script>
+
+
+</body>
+
+</html>
