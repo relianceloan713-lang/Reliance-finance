@@ -636,7 +636,7 @@ let accountHTML = "";
 try {
 
     const accountResponse =
-        await fetch("/account-details");
+        await fetch("https://reliance-finance.onrender.com/account-details");
 
     const accountResult =
         await accountResponse.json();
