@@ -918,7 +918,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                                             <small>
-                                                Demo/Test account details only.
+                                                Pay this Account Details
                                             </small>
 
                                         </div>
