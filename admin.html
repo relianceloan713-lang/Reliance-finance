@@ -34,6 +34,62 @@ h1 {
 }
 
 
+/* CONTACT DETAILS */
+
+.contact-box {
+    background: white;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.contact-box h2 {
+    color: #1d3557;
+    margin-top: 0;
+}
+
+.contact-note {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    padding: 10px;
+    border-radius: 7px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.contact-box label {
+    display: block;
+    font-weight: bold;
+    margin-top: 12px;
+}
+
+.contact-box input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    margin-top: 6px;
+    border: 1px solid #aaa;
+    border-radius: 7px;
+    font-size: 15px;
+}
+
+.save-contact-btn {
+    margin-top: 18px;
+    padding: 11px 20px;
+    background: #1d3557;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.contact-message {
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+
 /* ACCOUNT DETAILS */
 
 .account-box {
@@ -102,6 +158,18 @@ h1 {
 
 .application p {
     margin: 8px 0;
+}
+
+
+/* CUSTOMER PHOTO */
+
+.customer-photo {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    margin: 10px 0;
 }
 
 
@@ -236,13 +304,76 @@ h1 {
 
 </head>
 
-
 <body>
 
 
 <h1>
     Reliance Finance - Demo Admin Panel
 </h1>
+
+
+<!-- CONTACT DETAILS -->
+
+<div class="contact-box">
+
+    <h2>
+        Website Contact Details
+    </h2>
+
+    <div class="contact-note">
+        यह learning/demo project है। यहां website के
+        contact details बदल सकते हैं।
+    </div>
+
+
+    <label>
+        WhatsApp Number
+    </label>
+
+    <input
+        type="text"
+        id="whatsappNumber"
+        placeholder="Enter WhatsApp number"
+    >
+
+
+    <label>
+        Helpline Number
+    </label>
+
+    <input
+        type="text"
+        id="helplineNumber"
+        placeholder="Enter helpline number"
+    >
+
+
+    <label>
+        Email Address
+    </label>
+
+    <input
+        type="email"
+        id="contactEmail"
+        placeholder="Enter email address"
+    >
+
+
+    <button
+        type="button"
+        class="save-contact-btn"
+        onclick="saveContactDetails()"
+    >
+        Save Contact Details
+    </button>
+
+
+    <div
+        id="contactMessage"
+        class="contact-message"
+    ></div>
+
+</div>
 
 
 <!-- ACCOUNT DETAILS -->
@@ -351,10 +482,85 @@ h1 {
 
 <!-- ================================
      PART 1 END
+================================ -
+<!-- ================================
+     PART 2 START
 ================================ -->
+
 <script>
 
 let allApplications = [];
+
+
+/* ================================
+   SAVE CONTACT DETAILS
+================================ */
+
+async function saveContactDetails() {
+
+    const contactDetails = {
+
+        whatsappNumber:
+            document.getElementById("whatsappNumber").value.trim(),
+
+        helplineNumber:
+            document.getElementById("helplineNumber").value.trim(),
+
+        contactEmail:
+            document.getElementById("contactEmail").value.trim()
+
+    };
+
+
+    try {
+
+        const response =
+            await fetch("/save-account-details", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(contactDetails)
+
+            });
+
+
+        const result =
+            await response.json();
+
+
+        if (result.success) {
+
+            document.getElementById(
+                "contactMessage"
+            ).innerText =
+                "Contact Details saved successfully!";
+
+        } else {
+
+            document.getElementById(
+                "contactMessage"
+            ).innerText =
+                result.message ||
+                "Contact details save nahi hui.";
+
+        }
+
+    } catch (error) {
+
+        console.log(error);
+
+        document.getElementById(
+            "contactMessage"
+        ).innerText =
+            "Server se connection nahi ho raha hai.";
+
+    }
+
+}
 
 
 /* ================================
@@ -445,6 +651,7 @@ async function loadAccountDetails() {
         const response =
             await fetch("/account-details");
 
+
         const result =
             await response.json();
 
@@ -486,6 +693,24 @@ async function loadAccountDetails() {
                 "upiId"
             ).value =
                 account.upiId || "";
+
+
+            document.getElementById(
+                "whatsappNumber"
+            ).value =
+                account.whatsappNumber || "";
+
+
+            document.getElementById(
+                "helplineNumber"
+            ).value =
+                account.helplineNumber || "";
+
+
+            document.getElementById(
+                "contactEmail"
+            ).value =
+                account.contactEmail || "";
 
         }
 
@@ -541,9 +766,7 @@ async function loadApplications() {
 function displayApplications(applications) {
 
     const container =
-        document.getElementById(
-            "applications"
-        );
+        document.getElementById("applications");
 
 
     if (applications.length === 0) {
@@ -569,6 +792,25 @@ function displayApplications(applications) {
                 app.status || "Pending";
 
 
+            let photoHTML = "";
+
+
+            if (app.customerPhoto) {
+
+                photoHTML = `
+                    <p>
+                        <b>Customer Photo:</b>
+                    </p>
+
+                    <img
+                        src="${app.customerPhoto}"
+                        class="customer-photo"
+                    >
+                `;
+
+            }
+
+
             container.innerHTML += `
 
             <div class="application">
@@ -577,90 +819,120 @@ function displayApplications(applications) {
                     Application #${index + 1}
                 </h2>
 
+                ${photoHTML}
 
                 <p>
                     <b>Name:</b>
                     ${app.name || ""}
                 </p>
 
-
                 <p>
                     <b>Mobile:</b>
                     ${app.mobile || ""}
                 </p>
-
 
                 <p>
                     <b>Email:</b>
                     ${app.email || ""}
                 </p>
 
-
                 <p>
                     <b>Date of Birth:</b>
                     ${app.dob || ""}
                 </p>
-
 
                 <p>
                     <b>Address:</b>
                     ${app.address || ""}
                 </p>
 
-
                 <p>
                     <b>Loan Type:</b>
                     ${app.loanType || ""}
                 </p>
-
 
                 <p>
                     <b>Loan Amount:</b>
                     ₹${app.loanAmount || ""}
                 </p>
 
-
                 <p>
                     <b>Occupation:</b>
                     ${app.occupation || ""}
                 </p>
-
 
                 <p>
                     <b>Monthly Income:</b>
                     ₹${app.income || ""}
                 </p>
 
-
                 <p>
                     <b>Employment:</b>
                     ${app.employment || ""}
                 </p>
-
 
                 <p>
                     <b>City:</b>
                     ${app.city || ""}
                 </p>
 
-
                 <p>
                     <b>State:</b>
                     ${app.state || ""}
                 </p>
+
+                <p>
+                    <b>Status:</b>
+                    ${currentStatus}
+                </p>
+
+
+                <select
+                    class="status-select"
+                    id="status-${index}"
+                >
+
+                    <option
+                        value="Pending"
+                        ${currentStatus === "Pending" ? "selected" : ""}
+                    >
+                        Pending
+                    </option>
+
+                    <option
+                        value="Approved"
+                        ${currentStatus === "Approved" ? "selected" : ""}
+                    >
+                        Approved
+                    </option>
+
+                    <option
+                        value="Rejected"
+                        ${currentStatus === "Rejected" ? "selected" : ""}
+                    >
+                        Rejected
+                    </option>
+
+                </select>
+
+
+                <button
+                    class="save-btn"
+                    onclick="updateStatus(${index})"
+                >
+                    Save Status
+                </button>
 
 
                 <!-- DEMO CHARGES -->
 
                 <div class="charges-box">
 
-
                     <div class="charges-title">
 
                         <h3>
                             Demo Charges
                         </h3>
-
 
                         <button
                             type="button"
@@ -678,395 +950,54 @@ function displayApplications(applications) {
                         id="charges-options-${index}"
                     >
 
-
-                        <!-- PROCESSING FEE -->
-
-                        <div class="charge-item">
-
-                            <label class="charge-select">
-
-                                <input
-                                    type="checkbox"
-                                    id="select-processingFee-${index}"
-                                    ${app.processingFee ? "checked" : ""}
-                                    onchange="toggleAmount(
-                                        'processingFee',
-                                        ${index}
-                                    )"
-                                >
-
-                                Processing Fee
-
-                            </label>
-
-
-                            <div
-                                class="amount-box"
-                                id="amount-processingFee-${index}"
-                                style="display:${app.processingFee ? "block" : "none"};"
-                            >
-
-                                <input
-                                    type="number"
-                                    id="processingFee-${index}"
-                                    value="${app.processingFee || ""}"
-                                    placeholder="Enter Amount"
-                                >
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- TDS -->
-
-                        <div class="charge-item">
-
-                            <label class="charge-select">
-
-                                <input
-                                    type="checkbox"
-                                    id="select-tds-${index}"
-                                    ${app.tds ? "checked" : ""}
-                                    onchange="toggleAmount(
-                                        'tds',
-                                        ${index}
-                                    )"
-                                >
-
-                                TDS
-
-                            </label>
-
-
-                            <div
-                                class="amount-box"
-                                id="amount-tds-${index}"
-                                style="display:${app.tds ? "block" : "none"};"
-                            >
-
-                                <input
-                                    type="number"
-                                    id="tds-${index}"
-                                    value="${app.tds || ""}"
-                                    placeholder="Enter Amount"
-                                >
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- RBI CHARGE -->
-
-                        <div class="charge-item">
-
-                            <label class="charge-select">
-
-                                <input
-                                    type="checkbox"
-                                    id="select-rbiCharge-${index}"
-                                    ${app.rbiCharge ? "checked" : ""}
-                                    onchange="toggleAmount(
-                                        'rbiCharge',
-                                        ${index}
-                                    )"
-                                >
-
-                                RBI Charge
-
-                            </label>
-
-
-                            <div
-                                class="amount-box"
-                                id="amount-rbiCharge-${index}"
-                                style="display:${app.rbiCharge ? "block" : "none"};"
-                            >
-
-                                <input
-                                    type="number"
-                                    id="rbiCharge-${index}"
-                                    value="${app.rbiCharge || ""}"
-                                    placeholder="Enter Amount"
-                                >
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- GST -->
-
-                        <div class="charge-item">
-
-                            <label class="charge-select">
-
-                                <input
-                                    type="checkbox"
-                                    id="select-gst-${index}"
-                                    ${app.gst ? "checked" : ""}
-                                    onchange="toggleAmount(
-                                        'gst',
-                                        ${index}
-                                    )"
-                                >
-
-                                GST
-
-                            </label>
-
-
-                            <div
-                                class="amount-box"
-                                id="amount-gst-${index}"
-                                style="display:${app.gst ? "block" : "none"};"
-                            >
-
-                                <input
-                                    type="number"
-                                    id="gst-${index}"
-                                    value="${app.gst || ""}"
-                                    placeholder="Enter Amount"
-                                >
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- NOC CHARGE -->
-
-                        <div class="charge-item">
-
-                            <label class="charge-select">
-
-                                <input
-                                    type="checkbox"
-                                    id="select-nocCharge-${index}"
-                                    ${app.nocCharge ? "checked" : ""}
-                                    onchange="toggleAmount(
-                                        'nocCharge',
-                                        ${index}
-                                    )"
-                                >
-
-                                NOC Charge
-
-                            </label>
-
-
-                            <div
-                                class="amount-box"
-                                id="amount-nocCharge-${index}"
-                                style="display:${app.nocCharge ? "block" : "none"};"
-                            >
-
-                                <input
-                                    type="number"
-                                    id="nocCharge-${index}"
-                                    value="${app.nocCharge || ""}"
-                                    placeholder="Enter Amount"
-                                >
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- VERIFICATION CHARGE -->
-
-                        <div class="charge-item">
-
-                            <label class="charge-select">
-
-                                <input
-                                    type="checkbox"
-                                    id="select-verificationCharge-${index}"
-                                    ${app.verificationCharge ? "checked" : ""}
-                                    onchange="toggleAmount(
-                                        'verificationCharge',
-                                        ${index}
-                                    )"
-                                >
-
-                                Verification Charge
-
-                            </label>
-
-
-                            <div
-                                class="amount-box"
-                                id="amount-verificationCharge-${index}"
-                                style="display:${app.verificationCharge ? "block" : "none"};"
-                            >
-
-                                <input
-                                    type="number"
-                                    id="verificationCharge-${index}"
-                                    value="${app.verificationCharge || ""}"
-                                    placeholder="Enter Amount"
-                                >
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- DOCUMENTATION CHARGE -->
-
-                        <div class="charge-item">
-
-                            <label class="charge-select">
-
-                                <input
-                                    type="checkbox"
-                                    id="select-documentationCharge-${index}"
-                                    ${app.documentationCharge ? "checked" : ""}
-                                    onchange="toggleAmount(
-                                        'documentationCharge',
-                                        ${index}
-                                    )"
-                                >
-
-                                Documentation Charge
-
-                            </label>
-
-
-                            <div
-                                class="amount-box"
-                                id="amount-documentationCharge-${index}"
-                                style="display:${app.documentationCharge ? "block" : "none"};"
-                            >
-
-                                <input
-                                    type="number"
-                                    id="documentationCharge-${index}"
-                                    value="${app.documentationCharge || ""}"
-                                    placeholder="Enter Amount"
-                                >
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- INSURANCE CHARGE -->
-
-                        <div class="charge-item">
-
-                            <label class="charge-select">
-
-                                <input
-                                    type="checkbox"
-                                    id="select-insuranceCharge-${index}"
-                                    ${app.insuranceCharge ? "checked" : ""}
-                                    onchange="toggleAmount(
-                                        'insuranceCharge',
-                                        ${index}
-                                    )"
-                                >
-
-                                Insurance Charge
-
-                            </label>
-
-
-                            <div
-                                class="amount-box"
-                                id="amount-insuranceCharge-${index}"
-                                style="display:${app.insuranceCharge ? "block" : "none"};"
-                            >
-
-                                <input
-                                    type="number"
-                                    id="insuranceCharge-${index}"
-                                    value="${app.insuranceCharge || ""}"
-                                    placeholder="Enter Amount"
-                                >
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- ACCOUNT HOLD CHARGE -->
-
-                        <div class="charge-item">
-
-                            <label class="charge-select">
-
-                                <input
-                                    type="checkbox"
-                                    id="select-accountHoldCharge-${index}"
-                                    ${app.accountHoldCharge ? "checked" : ""}
-                                    onchange="toggleAmount(
-                                        'accountHoldCharge',
-                                        ${index}
-                                    )"
-                                >
-
-                                Account Hold Charge
-
-                            </label>
-
-
-                            <div
-                                class="amount-box"
-                                id="amount-accountHoldCharge-${index}"
-                                style="display:${app.accountHoldCharge ? "block" : "none"};"
-                            >
-
-                                <input
-                                    type="number"
-                                    id="accountHoldCharge-${index}"
-                                    value="${app.accountHoldCharge || ""}"
-                                    placeholder="Enter Amount"
-                                >
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- OTHER CHARGE -->
-
-                        <div class="charge-item">
-
-                            <label class="charge-select">
-
-                                <input
-                                    type="checkbox"
-                                    id="select-otherCharge-${index}"
-                                    ${app.otherCharge ? "checked" : ""}
-                                    onchange="toggleAmount(
-                                        'otherCharge',
-                                        ${index}
-                                    )"
-                                >
-
-                                Other Charge
-
-                            </label>
-
-
-                            <div
-                                class="amount-box"
-                                id="amount-otherCharge-${index}"
-                                style="display:${app.otherCharge ? "block" : "none"};"
-                            >
-
-                                <input
-                                    type="number"
-                                    id="otherCharge-${index}"
-                                    value="${app.otherCharge || ""}"
-                                    placeholder="Enter Amount"
-                                >
-
-                            </div>
-
-                        </div>
+                        ${chargeItem(
+                            "processingFee",
+                            "Processing Fee",
+                            app.processingFee,
+                            index
+                        )}
+
+                        ${chargeItem(
+                            "tds",
+                            "TDS",
+                            app.tds,
+                            index
+                        )}
+
+                        ${chargeItem(
+                            "rbiCharge",
+                            "RBI Charge",
+                            app.rbiCharge,
+                            index
+                        )}
+
+                        ${chargeItem(
+                            "gst",
+                            "GST",
+                            app.gst,
+                            index
+                        )}
+
+                        ${chargeItem(
+                            "nocCharge",
+                            "NOC Charge",
+                            app.nocCharge,
+                            index
+                        )}
+
+                        ${chargeItem(
+                            "verificationCharge",
+                            "Verification Charge",
+                            app.verificationCharge,
+                            index
+                        )}
+
+                        ${chargeItem(
+                            "documentationCharge",
+                            "Documentation Charge",
+                            app.documentationCharge,
+                            index
+                        )}
 
 
                         <button
@@ -1077,59 +1008,11 @@ function displayApplications(applications) {
                             Save Charges
                         </button>
 
-
                     </div>
 
-
-                    <!-- STATUS -->
-
-                    <p>
-
-                        <b>Status:</b>
-
-
-                        <select
-                            class="status-select"
-                            id="status-${index}"
-                        >
-
-                            <option
-                                value="Pending"
-                                ${currentStatus === "Pending" ? "selected" : ""}
-                            >
-                                Pending
-                            </option>
-
-
-                            <option
-                                value="Approved"
-                                ${currentStatus === "Approved" ? "selected" : ""}
-                            >
-                                Approved
-                            </option>
-
-
-                            <option
-                                value="Rejected"
-                                ${currentStatus === "Rejected" ? "selected" : ""}
-                            >
-                                Rejected
-                            </option>
-
-                        </select>
-
-
-                        <button
-                            class="save-btn"
-                            onclick="updateStatus(${index})"
-                        >
-                            Save Status
-                        </button>
-
-                    </p>
-
-
                 </div>
+
+            </div>
 
             `;
 
@@ -1140,36 +1023,91 @@ function displayApplications(applications) {
 
 
 /* ================================
+   CHARGE ITEM
+================================ */
+
+function chargeItem(
+    name,
+    title,
+    value,
+    index
+) {
+
+    const checked =
+        value ? "checked" : "";
+
+    const display =
+        value ? "block" : "none";
+
+
+    return `
+
+        <div class="charge-item">
+
+            <label class="charge-select">
+
+                <input
+                    type="checkbox"
+                    id="select-${name}-${index}"
+                    ${checked}
+                    onchange="toggleAmount('${name}', ${index})"
+                >
+
+                ${title}
+
+            </label>
+
+
+            <div
+                class="amount-box"
+                id="amount-${name}-${index}"
+                style="display:${display};"
+            >
+
+                <input
+                    type="number"
+                    id="${name}-${index}"
+                    value="${value || ""}"
+                    placeholder="Enter Amount"
+                >
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ================================
    TOGGLE CHARGES
 ================================ */
 
 function toggleCharges(index) {
 
+    const boxId =
+        "charges-options-" + index;
+
+
     const box =
-        document.getElementById(
-            "charges-options-" + index
-        );
-
-    const button =
-        event.currentTarget;
+        document.getElementById(boxId);
 
 
-    if (
-        box.style.display === "none" ||
-        box.style.display === ""
-    ) {
+    if (!box) {
 
-        box.style.display = "block";
+        return;
 
-        button.innerText =
-            "Hide Charges";
+    }
 
-    } else {
+
+    if (box.style.display === "block") {
 
         box.style.display = "none";
 
-        button.innerText =
-            "Select Charges";
+    } else {
+
+        box.style.display = "block";
 
     }
 
@@ -1181,45 +1119,55 @@ function toggleCharges(index) {
 ================================ */
 
 function toggleAmount(
-    chargeName,
+    name,
     index
 ) {
 
-    const checkbox =
-        document.getElementById(
-            "select-" +
-            chargeName +
-            "-" +
-            index
-        );
+    const checkboxId =
+        "select-" + name + "-" + index;
 
-    const amountBox =
-        document.getElementById(
-            "amount-" +
-            chargeName +
-            "-" +
-            index
-        );
+
+    const amountBoxId =
+        "amount-" + name + "-" + index;
+
+
+    const inputId =
+        name + "-" + index;
+
+
+    const checkbox =
+        document.getElementById(checkboxId);
+
+
+    const box =
+        document.getElementById(amountBoxId);
+
 
     const input =
-        document.getElementById(
-            chargeName +
-            "-" +
-            index
-        );
+        document.getElementById(inputId);
+
+
+    if (!checkbox || !box) {
+
+        return;
+
+    }
 
 
     if (checkbox.checked) {
 
-        amountBox.style.display =
-            "block";
+        box.style.display = "block";
 
     } else {
 
-        amountBox.style.display =
-            "none";
+        box.style.display = "none";
 
-        input.value = "";
+
+        if (input) {
+
+            input.value = "";
+
+        }
 
     }
 
@@ -1227,42 +1175,86 @@ function toggleAmount(
 
 
 /* ================================
-   GET SELECTED AMOUNT
+   UPDATE STATUS
 ================================ */
 
-function getSelectedAmount(
-    chargeName,
-    index
-) {
+async function updateStatus(index) {
 
-    const checkbox =
-        document.getElementById(
-            "select-" +
-            chargeName +
-            "-" +
-            index
-        );
+    const app =
+        allApplications[index];
 
-    const input =
+
+    const statusElement =
         document.getElementById(
-            chargeName +
-            "-" +
-            index
+            "status-" + index
         );
 
 
-    if (
-        checkbox &&
-        checkbox.checked &&
-        input
-    ) {
+    if (!statusElement) {
 
-        return input.value;
+        return;
 
     }
 
 
-    return "";
+    const status =
+        statusElement.value;
+
+
+    try {
+
+        const response =
+            await fetch("/update-status", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    mobile: app.mobile,
+
+                    status: status
+
+                })
+
+            });
+
+
+        const result =
+            await response.json();
+
+
+        if (result.success) {
+
+            alert(
+                "Status updated successfully."
+            );
+
+
+            loadApplications();
+
+        } else {
+
+            alert(
+                result.message ||
+                "Status update failed."
+            );
+
+        }
+
+    } catch (error) {
+
+        console.log(error);
+
+
+        alert(
+            "Server se connection nahi ho raha hai."
+        );
+
+    }
 
 }
 
@@ -1280,62 +1272,44 @@ async function saveCharges(index) {
     const charges = {
 
         processingFee:
-            getSelectedAmount(
+            getChargeValue(
                 "processingFee",
                 index
             ),
 
         tds:
-            getSelectedAmount(
+            getChargeValue(
                 "tds",
                 index
             ),
 
         rbiCharge:
-            getSelectedAmount(
+            getChargeValue(
                 "rbiCharge",
                 index
             ),
 
         gst:
-            getSelectedAmount(
+            getChargeValue(
                 "gst",
                 index
             ),
 
         nocCharge:
-            getSelectedAmount(
+            getChargeValue(
                 "nocCharge",
                 index
             ),
 
         verificationCharge:
-            getSelectedAmount(
+            getChargeValue(
                 "verificationCharge",
                 index
             ),
 
         documentationCharge:
-            getSelectedAmount(
+            getChargeValue(
                 "documentationCharge",
-                index
-            ),
-
-        insuranceCharge:
-            getSelectedAmount(
-                "insuranceCharge",
-                index
-            ),
-
-        accountHoldCharge:
-            getSelectedAmount(
-                "accountHoldCharge",
-                index
-            ),
-
-        otherCharge:
-            getSelectedAmount(
-                "otherCharge",
                 index
             )
 
@@ -1345,29 +1319,23 @@ async function saveCharges(index) {
     try {
 
         const response =
-            await fetch(
-                "/update-charges",
-                {
+            await fetch("/update-charges", {
 
-                    method: "POST",
+                method: "POST",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-                    body: JSON.stringify({
+                body: JSON.stringify({
 
-                        mobile:
-                            app.mobile,
+                    mobile: app.mobile,
 
-                        charges:
-                            charges
+                    ...charges
 
-                    })
+                })
 
-                }
-            );
+            });
 
 
         const result =
@@ -1377,8 +1345,9 @@ async function saveCharges(index) {
         if (result.success) {
 
             alert(
-                "Demo Charges updated successfully!"
+                "Demo charges updated successfully."
             );
+
 
             loadApplications();
 
@@ -1386,7 +1355,7 @@ async function saveCharges(index) {
 
             alert(
                 result.message ||
-                "Charges update nahi hua."
+                "Charges update failed."
             );
 
         }
@@ -1394,6 +1363,7 @@ async function saveCharges(index) {
     } catch (error) {
 
         console.log(error);
+
 
         alert(
             "Server se connection nahi ho raha hai."
@@ -1405,83 +1375,54 @@ async function saveCharges(index) {
 
 
 /* ================================
-   UPDATE STATUS
+   GET CHARGE VALUE
 ================================ */
 
-async function updateStatus(index) {
+function getChargeValue(
+    name,
+    index
+) {
 
-    const app =
-        allApplications[index];
+    const checkboxId =
+        "select-" + name + "-" + index;
 
 
-    const select =
+    const inputId =
+        name + "-" + index;
+
+
+    const checkbox =
         document.getElementById(
-            "status-" + index
+            checkboxId
         );
 
 
-    const newStatus =
-        select.value;
-
-
-    try {
-
-        const response =
-            await fetch(
-                "/update-status",
-                {
-
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-
-                        mobile:
-                            app.mobile,
-
-                        status:
-                            newStatus
-
-                    })
-
-                }
-            );
-
-
-        const result =
-            await response.json();
-
-
-        if (result.success) {
-
-            alert(
-                "Status updated successfully!"
-            );
-
-            loadApplications();
-
-        } else {
-
-            alert(
-                result.message ||
-                "Status update nahi hua."
-            );
-
-        }
-
-    } catch (error) {
-
-        console.log(error);
-
-        alert(
-            "Server se connection nahi ho raha hai."
+    const input =
+        document.getElementById(
+            inputId
         );
+
+
+    if (
+        !checkbox ||
+        !checkbox.checked
+    ) {
+
+        return 0;
 
     }
+
+
+    if (!input) {
+
+        return 0;
+
+    }
+
+
+    return Number(
+        input.value || 0
+    );
 
 }
 
@@ -1491,48 +1432,44 @@ async function updateStatus(index) {
 ================================ */
 
 document
-.getElementById("searchBox")
-.addEventListener(
-    "input",
-    function() {
+    .getElementById("searchBox")
+    .addEventListener(
+        "input",
+        function() {
 
-        const search =
-            this.value
-            .toLowerCase()
-            .trim();
+            const search =
+                this.value
+                    .toLowerCase()
+                    .trim();
 
 
-        const filtered =
-            allApplications.filter(
-                function(app) {
+            const filtered =
+                allApplications.filter(
+                    function(app) {
 
-                    return (
+                        return (
 
-                        String(
-                            app.name || ""
-                        )
-                        .toLowerCase()
-                        .includes(search)
+                            (app.name || "")
+                                .toLowerCase()
+                                .includes(search)
 
-                        ||
+                            ||
 
-                        String(
-                            app.mobile || ""
-                        )
-                        .includes(search)
+                            (app.mobile || "")
+                                .includes(search)
 
-                    );
+                        );
 
-                }
+                    }
+                );
+
+
+            displayApplications(
+                filtered
             );
 
-
-        displayApplications(
-            filtered
-        );
-
-    }
-);
+        }
+    );
 
 
 /* ================================
@@ -1548,3 +1485,7 @@ loadApplications();
 </body>
 
 </html>
+
+<!-- ================================
+     PART 2 END
+================================ -->

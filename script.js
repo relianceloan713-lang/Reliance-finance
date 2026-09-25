@@ -1,5 +1,5 @@
 // ==================================================
-// ===================== PART 1 ======================
+// ================= PART 1 START ====================
 // ==================================================
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -8,23 +8,40 @@ document.addEventListener("DOMContentLoaded", function () {
     // APPLY NOW
     // ==============================
 
-    const applyBtn = document.getElementById("applyBtn");
-    const loanModal = document.getElementById("loanModal");
-    const closeBtn = document.getElementById("closeBtn");
+    const applyBtn =
+        document.getElementById("applyBtn");
+
+    const loanModal =
+        document.getElementById("loanModal");
+
+    const closeBtn =
+        document.getElementById("closeBtn");
+
 
     if (applyBtn && loanModal) {
 
-        applyBtn.addEventListener("click", function () {
-            loanModal.style.display = "flex";
-        });
+        applyBtn.addEventListener(
+            "click",
+            function () {
+
+                loanModal.style.display = "flex";
+
+            }
+        );
 
     }
 
+
     if (closeBtn && loanModal) {
 
-        closeBtn.addEventListener("click", function () {
-            loanModal.style.display = "none";
-        });
+        closeBtn.addEventListener(
+            "click",
+            function () {
+
+                loanModal.style.display = "none";
+
+            }
+        );
 
     }
 
@@ -33,19 +50,41 @@ document.addEventListener("DOMContentLoaded", function () {
     // FORM STEPS
     // ==============================
 
-    const formStep1 = document.getElementById("formStep1");
-    const formStep2 = document.getElementById("formStep2");
-    const formStep3 = document.getElementById("formStep3");
-    const formStep4 = document.getElementById("formStep4");
+    const formStep1 =
+        document.getElementById("formStep1");
 
-    const loanForm = document.getElementById("loanForm");
-    const loanForm2 = document.getElementById("loanForm2");
-    const loanForm3 = document.getElementById("loanForm3");
+    const formStep2 =
+        document.getElementById("formStep2");
 
-    const step1 = document.getElementById("step1");
-    const step2 = document.getElementById("step2");
-    const step3 = document.getElementById("step3");
-    const step4 = document.getElementById("step4");
+    const formStep3 =
+        document.getElementById("formStep3");
+
+    const formStep4 =
+        document.getElementById("formStep4");
+
+
+    const loanForm =
+        document.getElementById("loanForm");
+
+    const loanForm2 =
+        document.getElementById("loanForm2");
+
+    const loanForm3 =
+        document.getElementById("loanForm3");
+
+
+    const step1 =
+        document.getElementById("step1");
+
+    const step2 =
+        document.getElementById("step2");
+
+    const step3 =
+        document.getElementById("step3");
+
+    const step4 =
+        document.getElementById("step4");
+
 
     const reviewDetails =
         document.getElementById("reviewDetails");
@@ -72,6 +111,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const file =
                     customerPhotoInput.files[0];
+
 
                 if (!file) {
 
@@ -101,23 +141,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     new FileReader();
 
 
-                reader.onload = function (event) {
+                reader.onload =
+                    function (event) {
 
-                    customerPhotoData =
-                        event.target.result;
+                        customerPhotoData =
+                            event.target.result;
 
-                };
+                    };
 
 
-                reader.onerror = function () {
+                reader.onerror =
+                    function () {
 
-                    alert(
-                        "Photo read nahi ho payi."
-                    );
+                        alert(
+                            "Photo read nahi ho payi."
+                        );
 
-                    customerPhotoData = "";
+                        customerPhotoData = "";
 
-                };
+                    };
 
 
                 reader.readAsDataURL(file);
@@ -134,19 +176,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (loanForm) {
 
-        loanForm.addEventListener("submit", function (e) {
+        loanForm.addEventListener(
+            "submit",
+            function (e) {
 
-            e.preventDefault();
+                e.preventDefault();
 
-            formStep1.style.display = "none";
 
-            formStep2.style.display = "block";
+                formStep1.style.display =
+                    "none";
 
-            step1.classList.remove("active-step");
+                formStep2.style.display =
+                    "block";
 
-            step2.classList.add("active-step");
 
-        });
+                step1.classList.remove(
+                    "active-step"
+                );
+
+                step2.classList.add(
+                    "active-step"
+                );
+
+            }
+        );
 
     }
 
@@ -157,19 +210,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (loanForm2) {
 
-        loanForm2.addEventListener("submit", function (e) {
+        loanForm2.addEventListener(
+            "submit",
+            function (e) {
 
-            e.preventDefault();
+                e.preventDefault();
 
-            formStep2.style.display = "none";
 
-            formStep3.style.display = "block";
+                formStep2.style.display =
+                    "none";
 
-            step2.classList.remove("active-step");
+                formStep3.style.display =
+                    "block";
 
-            step3.classList.add("active-step");
 
-        });
+                step2.classList.remove(
+                    "active-step"
+                );
+
+                step3.classList.add(
+                    "active-step"
+                );
+
+            }
+        );
 
     }
 
@@ -199,40 +263,64 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                 const name =
-                    document.getElementById("name").value;
+                    document.getElementById(
+                        "name"
+                    ).value;
 
                 const dob =
-                    document.getElementById("dob").value;
+                    document.getElementById(
+                        "dob"
+                    ).value;
 
                 const mobile =
-                    document.getElementById("mobile").value;
+                    document.getElementById(
+                        "mobile"
+                    ).value;
 
                 const email =
-                    document.getElementById("email").value;
+                    document.getElementById(
+                        "email"
+                    ).value;
 
                 const address =
-                    document.getElementById("address").value;
+                    document.getElementById(
+                        "address"
+                    ).value;
 
                 const loanType =
-                    document.getElementById("loanType").value;
+                    document.getElementById(
+                        "loanType"
+                    ).value;
 
                 const loanAmount =
-                    document.getElementById("loanAmount").value;
+                    document.getElementById(
+                        "loanAmount"
+                    ).value;
 
                 const occupation =
-                    document.getElementById("occupation").value;
+                    document.getElementById(
+                        "occupation"
+                    ).value;
 
                 const income =
-                    document.getElementById("income").value;
+                    document.getElementById(
+                        "income"
+                    ).value;
 
                 const employment =
-                    document.getElementById("employment").value;
+                    document.getElementById(
+                        "employment"
+                    ).value;
 
                 const city =
-                    document.getElementById("city").value;
+                    document.getElementById(
+                        "city"
+                    ).value;
 
                 const state =
-                    document.getElementById("state").value;
+                    document.getElementById(
+                        "state"
+                    ).value;
 
 
                 // ==============================
@@ -328,13 +416,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 `;
 
 
-                formStep3.style.display = "none";
+                formStep3.style.display =
+                    "none";
 
-                formStep4.style.display = "block";
+                formStep4.style.display =
+                    "block";
 
-                step3.classList.remove("active-step");
 
-                step4.classList.add("active-step");
+                step3.classList.remove(
+                    "active-step"
+                );
+
+                step4.classList.add(
+                    "active-step"
+                );
 
             }
         );
@@ -355,40 +450,64 @@ document.addEventListener("DOMContentLoaded", function () {
                 const application = {
 
                     name:
-                        document.getElementById("name").value,
+                        document.getElementById(
+                            "name"
+                        ).value,
 
                     dob:
-                        document.getElementById("dob").value,
+                        document.getElementById(
+                            "dob"
+                        ).value,
 
                     mobile:
-                        document.getElementById("mobile").value,
+                        document.getElementById(
+                            "mobile"
+                        ).value,
 
                     email:
-                        document.getElementById("email").value,
+                        document.getElementById(
+                            "email"
+                        ).value,
 
                     address:
-                        document.getElementById("address").value,
+                        document.getElementById(
+                            "address"
+                        ).value,
 
                     loanType:
-                        document.getElementById("loanType").value,
+                        document.getElementById(
+                            "loanType"
+                        ).value,
 
                     loanAmount:
-                        document.getElementById("loanAmount").value,
+                        document.getElementById(
+                            "loanAmount"
+                        ).value,
 
                     occupation:
-                        document.getElementById("occupation").value,
+                        document.getElementById(
+                            "occupation"
+                        ).value,
 
                     income:
-                        document.getElementById("income").value,
+                        document.getElementById(
+                            "income"
+                        ).value,
 
                     employment:
-                        document.getElementById("employment").value,
+                        document.getElementById(
+                            "employment"
+                        ).value,
 
                     city:
-                        document.getElementById("city").value,
+                        document.getElementById(
+                            "city"
+                        ).value,
 
                     state:
-                        document.getElementById("state").value,
+                        document.getElementById(
+                            "state"
+                        ).value,
 
                     customerPhoto:
                         customerPhotoData || "",
@@ -404,7 +523,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 try {
 
-                    submitApplication.disabled = true;
+                    submitApplication.disabled =
+                        true;
 
                     submitApplication.innerText =
                         "Submitting...";
@@ -422,7 +542,9 @@ document.addEventListener("DOMContentLoaded", function () {
                                 },
 
                                 body:
-                                    JSON.stringify(application)
+                                    JSON.stringify(
+                                        application
+                                    )
                             }
                         );
 
@@ -437,9 +559,11 @@ document.addEventListener("DOMContentLoaded", function () {
                             "Application Submitted Successfully!"
                         );
 
-                        loanModal.style.display = "none";
+                        loanModal.style.display =
+                            "none";
 
                         location.reload();
+
 
                     } else {
 
@@ -448,7 +572,8 @@ document.addEventListener("DOMContentLoaded", function () {
                             "Application save nahi hui."
                         );
 
-                        submitApplication.disabled = false;
+                        submitApplication.disabled =
+                            false;
 
                         submitApplication.innerText =
                             "Submit Application";
@@ -463,7 +588,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         "Server se connection nahi ho raha hai."
                     );
 
-                    submitApplication.disabled = false;
+                    submitApplication.disabled =
+                        false;
 
                     submitApplication.innerText =
                         "Submit Application";
@@ -475,43 +601,48 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
+    // ==================================================
+    // ================= PART 1 END ======================
+    // ==================================================
 
+});
 // ==================================================
-// =============== PART 1 ENDS HERE =================
+// ================= PART 2 START ====================
 // ==================================================
 
-// ===================== PART 2 ======================
-// ==================================================
+
 // ==============================
 // CHECK MY STATUS
 // ==============================
 
-    const statusBtn =
-        document.getElementById("statusBtn");
+const statusBtn =
+    document.getElementById("statusBtn");
 
-    const statusModal =
-        document.getElementById("statusModal");
+const statusModal =
+    document.getElementById("statusModal");
 
-    const closeStatusBtn =
-        document.getElementById("closeStatusBtn");
+const closeStatusBtn =
+    document.getElementById("closeStatusBtn");
 
-    const checkStatusBtn =
-        document.getElementById("checkStatusBtn");
+const checkStatusBtn =
+    document.getElementById("checkStatusBtn");
 
-    const statusMobile =
-        document.getElementById("statusMobile");
+const statusMobile =
+    document.getElementById("statusMobile");
 
-    const statusResult =
-        document.getElementById("statusResult");
+const statusResult =
+    document.getElementById("statusResult");
 
 
-    // ==============================
-    // OPEN STATUS
-    // ==============================
+// ==============================
+// OPEN STATUS
+// ==============================
 
-    if (statusBtn && statusModal) {
+if (statusBtn && statusModal) {
 
-        statusBtn.addEventListener("click", function () {
+    statusBtn.addEventListener(
+        "click",
+        function () {
 
             statusModal.style.display = "flex";
 
@@ -523,619 +654,698 @@ document.addEventListener("DOMContentLoaded", function () {
                 statusResult.innerHTML = "";
             }
 
-        });
+        }
+    );
 
-    }
+}
 
 
-    // ==============================
-    // CLOSE STATUS
-    // ==============================
+// ==============================
+// CLOSE STATUS
+// ==============================
 
-    if (closeStatusBtn && statusModal) {
+if (closeStatusBtn && statusModal) {
 
-        closeStatusBtn.addEventListener("click", function () {
+    closeStatusBtn.addEventListener(
+        "click",
+        function () {
 
             statusModal.style.display = "none";
 
-        });
+        }
+    );
 
-    }
-
-
-    // ==============================
-    // CHECK STATUS
-    // ==============================
-
-    if (checkStatusBtn) {
-
-        checkStatusBtn.addEventListener(
-            "click",
-            async function () {
-
-                const mobile =
-                    statusMobile.value.trim();
+}
 
 
-                if (!/^[0-9]{10}$/.test(mobile)) {
+// ==============================
+// CHECK STATUS
+// ==============================
 
-                    statusResult.innerHTML = `
+if (checkStatusBtn) {
 
-                        <p class="status-error">
-                            Please enter a valid
-                            10-digit mobile number.
-                        </p>
+    checkStatusBtn.addEventListener(
+        "click",
+        async function () {
 
-                    `;
+            const mobile =
+                statusMobile.value.trim();
 
-                    return;
 
-                }
-
+            if (!/^[0-9]{10}$/.test(mobile)) {
 
                 statusResult.innerHTML = `
-
-                    <p>
-                        Checking application...
+                    <p class="status-error">
+                        Please enter a valid
+                        10-digit mobile number.
                     </p>
-
                 `;
 
+                return;
 
-                try {
-
-                    const response =
-                        await fetch(
-                            "https://reliance-finance.onrender.com/check-application?mobile=" +
-                            encodeURIComponent(mobile)
-                        );
+            }
 
 
-                    const result =
-                        await response.json();
+            statusResult.innerHTML = `
+                <p>
+                    Checking application...
+                </p>
+            `;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/check-application?mobile=" +
+                        encodeURIComponent(mobile)
+                    );
+
+
+                const result =
+                    await response.json();
+
+
+                if (
+                    result.success &&
+                    result.application
+                ) {
+
+                    const app =
+                        result.application;
+
+
+                    let applicationDate =
+                        "Not available";
+
+
+                    if (app.submittedAt) {
+
+                        applicationDate =
+                            new Date(
+                                app.submittedAt
+                            ).toLocaleString(
+                                "en-IN"
+                            );
+
+                    }
+
+
+                    const currentStatus =
+                        app.status || "Pending";
+
+
+                    let statusClass =
+                        "status-pending";
 
 
                     if (
-                        result.success &&
-                        result.application
+                        currentStatus === "Approved"
                     ) {
 
-                        const app =
-                            result.application;
+                        statusClass =
+                            "status-approved";
+
+                    }
 
 
-                        let applicationDate =
-                            "Not available";
+                    if (
+                        currentStatus === "Rejected"
+                    ) {
+
+                        statusClass =
+                            "status-rejected";
+
+                    }
 
 
-                        if (app.submittedAt) {
+                    // ==============================
+                    // CUSTOMER PHOTO
+                    // ==============================
 
-                            applicationDate =
-                                new Date(
-                                    app.submittedAt
-                                ).toLocaleString(
-                                    "en-IN"
-                                );
-
-                        }
+                    let customerPhotoHTML = "";
 
 
-                        const currentStatus =
-                            app.status || "Pending";
+                    if (
+                        app.customerPhoto &&
+                        String(
+                            app.customerPhoto
+                        ).trim() !== ""
+                    ) {
 
+                        customerPhotoHTML = `
 
-                        let statusClass =
-                            "status-pending";
+                            <div style="
+                                text-align:center;
+                                margin-bottom:20px;
+                            ">
 
-
-                        if (
-                            currentStatus === "Approved"
-                        ) {
-
-                            statusClass =
-                                "status-approved";
-
-                        }
-
-
-                        if (
-                            currentStatus === "Rejected"
-                        ) {
-
-                            statusClass =
-                                "status-rejected";
-
-                        }
-
-
-                        // ==============================
-                        // CUSTOMER PHOTO
-                        // ==============================
-
-                        let customerPhotoHTML = "";
-
-
-                        if (
-                            app.customerPhoto &&
-                            String(
-                                app.customerPhoto
-                            ).trim() !== ""
-                        ) {
-
-                            customerPhotoHTML = `
-
-                                <div style="
-                                    text-align:center;
-                                    margin-bottom:20px;
-                                ">
-
-                                    <img
-                                        src="${app.customerPhoto}"
-                                        alt="Customer Photo"
-                                        style="
-                                            width:120px;
-                                            height:120px;
-                                            object-fit:cover;
-                                            border-radius:50%;
-                                            border:4px solid #1765c0;
-                                            box-shadow:0 4px 15px rgba(0,0,0,0.15);
-                                        "
-                                    >
-
-                                    <p style="
-                                        margin-top:8px;
-                                        font-weight:bold;
-                                    ">
-                                        Customer Photo
-                                    </p>
-
-                                </div>
-
-                            `;
-
-                        }
-
-
-                        // ==============================
-                        // CHARGES
-                        // ==============================
-
-                        const charges = [
-
-                            {
-                                name: "Processing Fee",
-                                value: app.processingFee
-                            },
-
-                            {
-                                name: "TDS",
-                                value: app.tds
-                            },
-
-                            {
-                                name: "GST",
-                                value: app.gst
-                            },
-
-                            {
-                                name: "RBI Charge",
-                                value: app.rbiCharge
-                            },
-
-                            {
-                                name: "NOC Charge",
-                                value: app.nocCharge
-                            },
-
-                            {
-                                name: "Verification Charge",
-                                value: app.verificationCharge
-                            },
-
-                            {
-                                name: "Documentation Charge",
-                                value: app.documentationCharge
-                            },
-
-                            {
-                                name: "Insurance Charge",
-                                value: app.insuranceCharge
-                            },
-
-                            {
-                                name: "Account Hold Charge",
-                                value: app.accountHoldCharge
-                            },
-
-                            {
-                                name: "Other Charge",
-                                value: app.otherCharge
-                            }
-
-                        ];
-
-
-                        const activeCharges =
-                            charges.filter(
-                                function (charge) {
-
-                                    return (
-                                        charge.value !== undefined &&
-                                        charge.value !== null &&
-                                        String(
-                                            charge.value
-                                        ).trim() !== "" &&
-                                        Number(
-                                            charge.value
-                                        ) > 0
-                                    );
-
-                                }
-                            );
-
-
-                        let chargesHTML = "";
-
-
-                        if (
-                            activeCharges.length > 0
-                        ) {
-
-                            chargesHTML = `
-
-                                <div
-                                    class="demo-charges"
-                                    style="margin-top:20px;"
+                                <img
+                                    src="${app.customerPhoto}"
+                                    alt="Customer Photo"
+                                    style="
+                                        width:120px;
+                                        height:120px;
+                                        object-fit:cover;
+                                        border-radius:50%;
+                                        border:4px solid #1765c0;
+                                    "
                                 >
 
-                                    <button
-                                        type="button"
-                                        id="viewChargesBtn"
-                                        class="save-btn"
-                                    >
-                                        View Charges
-                                    </button>
-
-
-                                    <div
-                                        id="chargesList"
-                                        style="display:none;"
-                                    >
-
-                                        <h3>
-                                            Loan Charge Details
-                                        </h3>
-
-
-                                        ${activeCharges.map(
-                                            function (charge) {
-
-                                                return `
-
-                                                    <p>
-                                                        <b>
-                                                            ${charge.name}:
-                                                        </b>
-
-                                                        ₹${charge.value}
-                                                    </p>
-
-                                                `;
-
-                                            }
-                                        ).join("")}
-
-                                    </div>
-
-                                </div>
-
-                            `;
-
-                        }
-
-
-                        // ==============================
-                        // DEMO ACCOUNT DETAILS
-                        // ==============================
-
-                        let accountHTML = "";
-
-
-                        try {
-
-                            const accountResponse =
-                                await fetch(
-                                    "https://reliance-finance.onrender.com/account-details"
-                                );
-
-
-                            const accountResult =
-                                await accountResponse.json();
-
-
-                            if (
-                                accountResult.success &&
-                                accountResult.accountDetails
-                            ) {
-
-                                const account =
-                                    accountResult.accountDetails;
-
-
-                                if (
-                                    account.accountHolderName ||
-                                    account.bankName ||
-                                    account.accountNumber ||
-                                    account.ifscCode ||
-                                    account.upiId
-                                ) {
-
-                                    accountHTML = `
-
-                                        <div style="
-                                            margin-top:20px;
-                                            padding:18px;
-                                            background:#f5f9ff;
-                                            border:2px solid #dce8f7;
-                                            border-radius:14px;
-                                        ">
-
-                                            <h3 style="
-                                                margin-top:0;
-                                            ">
-                                                🏦 Pay this Again
-                                            </h3>
-
-
-                                            <p>
-                                                <b>Account Holder:</b>
-                                                ${account.accountHolderName || "-"}
-                                            </p>
-
-
-                                            <p>
-                                                <b>Bank Name:</b>
-                                                ${account.bankName || "-"}
-                                            </p>
-
-
-                                            <p>
-                                                <b>Account Number:</b>
-                                                ${account.accountNumber || "-"}
-                                            </p>
-
-
-                                            <p>
-                                                <b>IFSC Code:</b>
-                                                ${account.ifscCode || "-"}
-                                            </p>
-
-
-                                            <p>
-                                                <b>UPI ID:</b>
-                                                ${account.upiId || "-"}
-                                            </p>
-
-
-                                            <small>
-                                                Pay this Account Details
-                                            </small>
-
-                                        </div>
-
-                                    `;
-
-                                }
-
-                            }
-
-                        } catch (error) {
-
-                            console.log(
-                                "Account details error:",
-                                error
-                            );
-
-                        }
-
-
-                        // ==============================
-                        // SHOW RESULT
-                        // ==============================
-
-                        statusResult.innerHTML = `
-
-                            <div class="status-card">
-
-                                ${customerPhotoHTML}
-
-
-                                <p class="status-success">
-                                    ✓ Application Found
-                                </p>
-
-
                                 <p>
-                                    <b>Name:</b>
-                                    ${app.name}
+                                    <b>
+                                        Customer Photo
+                                    </b>
                                 </p>
-
-
-                                <p>
-                                    <b>Mobile:</b>
-                                    ${app.mobile}
-                                </p>
-
-
-                                <p>
-                                    <b>Email:</b>
-                                    ${app.email}
-                                </p>
-
-
-                                <p>
-                                    <b>Loan Type:</b>
-                                    ${app.loanType}
-                                </p>
-
-
-                                <p>
-                                    <b>Loan Amount:</b>
-                                    ₹${app.loanAmount}
-                                </p>
-
-
-                                <p>
-                                    <b>Occupation:</b>
-                                    ${app.occupation}
-                                </p>
-
-
-                                <p>
-                                    <b>Monthly Income:</b>
-                                    ₹${app.income}
-                                </p>
-
-
-                                <p>
-                                    <b>Employment:</b>
-                                    ${app.employment}
-                                </p>
-
-
-                                <p>
-                                    <b>City:</b>
-                                    ${app.city}
-                                </p>
-
-
-                                <p>
-                                    <b>State:</b>
-                                    ${app.state}
-                                </p>
-
-
-                                <p>
-                                    <b>Application Date:</b>
-                                    ${applicationDate}
-                                </p>
-
-
-                                <p>
-                                    <b>Status:</b>
-
-                                    <span class="${statusClass}">
-                                        ${currentStatus}
-                                    </span>
-
-                                </p>
-
-
-                                ${chargesHTML}
-
-
-                                ${accountHTML}
 
                             </div>
-
-                        `;
-
-
-                        // ==============================
-                        // VIEW CHARGES BUTTON
-                        // ==============================
-
-                        const viewChargesBtn =
-                            document.getElementById(
-                                "viewChargesBtn"
-                            );
-
-
-                        const chargesList =
-                            document.getElementById(
-                                "chargesList"
-                            );
-
-
-                        if (
-                            viewChargesBtn &&
-                            chargesList
-                        ) {
-
-                            viewChargesBtn.addEventListener(
-                                "click",
-                                function () {
-
-                                    if (
-                                        chargesList.style.display ===
-                                        "none"
-                                    ) {
-
-                                        chargesList.style.display =
-                                            "block";
-
-                                        viewChargesBtn.innerText =
-                                            "Hide Charges";
-
-                                    } else {
-
-                                        chargesList.style.display =
-                                            "none";
-
-                                        viewChargesBtn.innerText =
-                                            "View Charges";
-
-                                    }
-
-                                }
-                            );
-
-                        }
-
-
-                    } else {
-
-                        // ==============================
-                        // APPLICATION NOT FOUND
-                        // ==============================
-
-                        statusResult.innerHTML = `
-
-                            <p class="status-error">
-                                ❌ Application not found.
-                            </p>
 
                         `;
 
                     }
 
 
-                } catch (error) {
-
                     // ==============================
-                    // SERVER ERROR
+                    // CHARGES
                     // ==============================
 
-                    console.log(error);
+                    const charges = [
+
+                        {
+                            name: "Processing Fee",
+                            value: app.processingFee
+                        },
+
+                        {
+                            name: "TDS",
+                            value: app.tds
+                        },
+
+                        {
+                            name: "GST",
+                            value: app.gst
+                        },
+
+                        {
+                            name: "RBI Charge",
+                            value: app.rbiCharge
+                        },
+
+                        {
+                            name: "NOC Charge",
+                            value: app.nocCharge
+                        },
+
+                        {
+                            name: "Verification Charge",
+                            value: app.verificationCharge
+                        },
+
+                        {
+                            name: "Documentation Charge",
+                            value: app.documentationCharge
+                        },
+
+                        {
+                            name: "Insurance Charge",
+                            value: app.insuranceCharge
+                        },
+
+                        {
+                            name: "Account Hold Charge",
+                            value: app.accountHoldCharge
+                        },
+
+                        {
+                            name: "Other Charge",
+                            value: app.otherCharge
+                        }
+
+                    ];
+
+
+                    const activeCharges =
+                        charges.filter(
+                            function (charge) {
+
+                                return (
+                                    charge.value !== undefined &&
+                                    charge.value !== null &&
+                                    String(
+                                        charge.value
+                                    ).trim() !== "" &&
+                                    Number(
+                                        charge.value
+                                    ) > 0
+                                );
+
+                            }
+                        );
+
+
+                    let chargesHTML = "";
+
+
+                    if (
+                        activeCharges.length > 0
+                    ) {
+
+                        chargesHTML = `
+
+                            <div
+                                class="demo-charges"
+                                style="margin-top:20px;"
+                            >
+
+                                <button
+                                    type="button"
+                                    id="viewChargesBtn"
+                                    class="save-btn"
+                                >
+                                    View Charges
+                                </button>
+
+
+                                <div
+                                    id="chargesList"
+                                    style="display:none;"
+                                >
+
+                                    <h3>
+                                        Loan Charge Details
+                                    </h3>
+
+
+                                    ${activeCharges.map(
+                                        function (charge) {
+
+                                            return `
+
+                                                <p>
+                                                    <b>
+                                                        ${charge.name}:
+                                                    </b>
+
+                                                    ₹${charge.value}
+                                                </p>
+
+                                            `;
+
+                                        }
+                                    ).join("")}
+
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    }
+
+
+                    // ==============================
+                    // DEMO ACCOUNT DETAILS
+                    // ==============================
+
+                    let accountHTML = "";
+
+
+                    try {
+
+                        const accountResponse =
+                            await fetch(
+                                "/account-details"
+                            );
+
+
+                        const accountResult =
+                            await accountResponse.json();
+
+
+                        if (
+                            accountResult.success &&
+                            accountResult.accountDetails
+                        ) {
+
+                            const account =
+                                accountResult.accountDetails;
+
+
+                            if (
+                                account.accountHolderName ||
+                                account.bankName ||
+                                account.accountNumber ||
+                                account.ifscCode ||
+                                account.upiId
+                            ) {
+
+                                accountHTML = `
+
+                                    <div style="
+                                        margin-top:20px;
+                                        padding:18px;
+                                        background:#f5f9ff;
+                                        border:2px solid #dce8f7;
+                                        border-radius:14px;
+                                    ">
+
+                                        <h3>
+                                            🏦 Demo Account Details
+                                        </h3>
+
+
+                                        <p>
+                                            <b>
+                                                Account Holder:
+                                            </b>
+
+                                            ${account.accountHolderName || "-"}
+                                        </p>
+
+
+                                        <p>
+                                            <b>
+                                                Bank Name:
+                                            </b>
+
+                                            ${account.bankName || "-"}
+                                        </p>
+
+
+                                        <p>
+                                            <b>
+                                                Account Number:
+                                            </b>
+
+                                            ${account.accountNumber || "-"}
+                                        </p>
+
+
+                                        <p>
+                                            <b>
+                                                IFSC Code:
+                                            </b>
+
+                                            ${account.ifscCode || "-"}
+                                        </p>
+
+
+                                        <p>
+                                            <b>
+                                                UPI ID:
+                                            </b>
+
+                                            ${account.upiId || "-"}
+                                        </p>
+
+                                    </div>
+
+                                `;
+
+                            }
+
+                        }
+
+                    } catch (error) {
+
+                        console.log(
+                            "Account details error:",
+                            error
+                        );
+
+                    }
+
+
+                    // ==============================
+                    // SHOW RESULT
+                    // ==============================
+
+                    statusResult.innerHTML = `
+
+                        <div class="status-card">
+
+                            ${customerPhotoHTML}
+
+
+                            <p class="status-success">
+                                ✓ Application Found
+                            </p>
+
+
+                            <p>
+                                <b>Name:</b>
+                                ${app.name}
+                            </p>
+
+
+                            <p>
+                                <b>Mobile:</b>
+                                ${app.mobile}
+                            </p>
+
+
+                            <p>
+                                <b>Email:</b>
+                                ${app.email}
+                            </p>
+
+
+                            <p>
+                                <b>Loan Type:</b>
+                                ${app.loanType}
+                            </p>
+
+
+                            <p>
+                                <b>Loan Amount:</b>
+                                ₹${app.loanAmount}
+                            </p>
+
+
+                            <p>
+                                <b>Occupation:</b>
+                                ${app.occupation}
+                            </p>
+
+
+                            <p>
+                                <b>Monthly Income:</b>
+                                ₹${app.income}
+                            </p>
+
+
+                            <p>
+                                <b>Employment:</b>
+                                ${app.employment}
+                            </p>
+
+
+                            <p>
+                                <b>City:</b>
+                                ${app.city}
+                            </p>
+
+
+                            <p>
+                                <b>State:</b>
+                                ${app.state}
+                            </p>
+
+
+                            <p>
+                                <b>Application Date:</b>
+                                ${applicationDate}
+                            </p>
+
+
+                            <p>
+                                <b>Status:</b>
+
+                                <span class="${statusClass}">
+                                    ${currentStatus}
+                                </span>
+
+                            </p>
+
+
+                            ${chargesHTML}
+
+
+                            ${accountHTML}
+
+                        </div>
+
+                    `;
+
+
+                    // ==============================
+                    // VIEW CHARGES
+                    // ==============================
+
+                    const viewChargesBtn =
+                        document.getElementById(
+                            "viewChargesBtn"
+                        );
+
+
+                    const chargesList =
+                        document.getElementById(
+                            "chargesList"
+                        );
+
+
+                    if (
+                        viewChargesBtn &&
+                        chargesList
+                    ) {
+
+                        viewChargesBtn.addEventListener(
+                            "click",
+                            function () {
+
+                                if (
+                                    chargesList.style.display ===
+                                    "none"
+                                ) {
+
+                                    chargesList.style.display =
+                                        "block";
+
+                                    viewChargesBtn.innerText =
+                                        "Hide Charges";
+
+                                } else {
+
+                                    chargesList.style.display =
+                                        "none";
+
+                                    viewChargesBtn.innerText =
+                                        "View Charges";
+
+                                }
+
+                            }
+                        );
+
+                    }
+
+
+                } else {
 
                     statusResult.innerHTML = `
 
                         <p class="status-error">
-                            Server se connection nahi ho raha hai.
+                            ❌ Application not found.
                         </p>
 
                     `;
 
                 }
 
+
+            } catch (error) {
+
+                console.log(error);
+
+
+                statusResult.innerHTML = `
+
+                    <p class="status-error">
+                        Server se connection nahi ho raha hai.
+                    </p>
+
+                `;
+
             }
+
+        }
+    );
+
+}
+
+
+// ==============================
+// LOAD CONTACT DETAILS
+// ==============================
+
+async function loadWebsiteContactDetails() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/account-details"
+            );
+
+
+        const data =
+            await response.json();
+
+
+        const account =
+            data.accountDetails || {};
+
+
+        const whatsapp =
+            document.getElementById(
+                "websiteWhatsapp"
+            );
+
+
+        const helpline =
+            document.getElementById(
+                "websiteHelpline"
+            );
+
+
+        const email =
+            document.getElementById(
+                "websiteEmail"
+            );
+
+
+        if (whatsapp) {
+
+            whatsapp.innerText =
+                account.whatsappNumber || "";
+
+        }
+
+
+        if (helpline) {
+
+            helpline.innerText =
+                account.helplineNumber || "";
+
+        }
+
+
+        if (email) {
+
+            email.innerText =
+                account.contactEmail || "";
+
+        }
+
+    } catch (error) {
+
+        console.log(
+            "Contact details error:",
+            error
         );
 
     }
 
+}
+
+
+// ==============================
+// START CONTACT DETAILS
+// ==============================
+
+loadWebsiteContactDetails();
+
 
 // ==================================================
-// ================== PART 2 ENDS ===================
+// ================= PART 2 END ======================
 // ==================================================
-
-});
