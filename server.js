@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const { Pool } = require("pg");
 
 const app = express();
 
@@ -10,418 +11,103 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 
-// ==============================
-// HOME
-// ==============================
+// ==================================================
+// POSTGRESQL DATABASE
+// ==================================================
 
-app.get("/", function (req, res) {
-    res.sendFile(path.join(__dirname, "index.html"));
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+
+    ssl: process.env.DATABASE_URL
+        ? { rejectUnauthorized: false }
+        : false
 });
 
 
-// ==============================
-// SAVE APPLICATION
-// ==============================
+// ==================================================
+// DATABASE SETUP
+// ==================================================
 
-app.post("/submit-application", function (req, res) {
+async function setupDatabase() {
 
-    try {
+    if (!process.env.DATABASE_URL) {
 
-        const file = path.join(__dirname, "applications.json");
-
-        let applications = [];
-
-        if (fs.existsSync(file)) {
-
-            const data = fs.readFileSync(file, "utf8");
-
-            if (data.trim() !== "") {
-                applications = JSON.parse(data);
-            }
-
-        }
-
-        applications.push(req.body);
-
-        fs.writeFileSync(
-            file,
-            JSON.stringify(applications, null, 2)
+        console.log(
+            "DATABASE_URL nahi mila. Local JSON mode use hoga."
         );
 
-        res.json({
-            success: true,
-            message: "Application saved successfully"
-        });
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Application save nahi hui"
-        });
-
+        return;
     }
-
-});
-
-
-// ==============================
-// GET APPLICATIONS
-// ==============================
-
-app.get("/applications", function (req, res) {
 
     try {
 
-        const file = path.join(__dirname, "applications.json");
-
-        if (!fs.existsSync(file)) {
-            return res.json([]);
-        }
-
-        const data = fs.readFileSync(file, "utf8");
-
-        if (data.trim() === "") {
-            return res.json([]);
-        }
-
-        const applications = JSON.parse(data);
-
-        res.json(applications);
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Applications load nahi hui"
-        });
-
-    }
-
-});
-
-
-// ==============================
-// CHECK APPLICATION
-// ==============================
-
-app.get("/check-application", function (req, res) {
-
-    try {
-
-        const mobile = req.query.mobile;
-
-        const file = path.join(__dirname, "applications.json");
-
-        if (!fs.existsSync(file)) {
-
-            return res.json({
-                success: false
-            });
-
-        }
-
-        const data = fs.readFileSync(file, "utf8");
-
-        if (data.trim() === "") {
-
-            return res.json({
-                success: false
-            });
-
-        }
-
-        const applications = JSON.parse(data);
-
-        const application = applications.find(function (app) {
-
-            return app.mobile === mobile;
-
-        });
-
-        if (application) {
-
-            res.json({
-                success: true,
-                application: application
-            });
-
-        } else {
-
-            res.json({
-                success: false
-            });
-
-        }
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            success: false
-        });
-
-    }
-
-});
-
-
-// ==============================
-// UPDATE APPLICATION STATUS
-// ==============================
-
-app.post("/update-status", function (req, res) {
-
-    try {
-
-        const mobile = req.body.mobile;
-        const status = req.body.status;
-
-        const file = path.join(__dirname, "applications.json");
-
-        if (!fs.existsSync(file)) {
-
-            return res.status(404).json({
-                success: false,
-                message: "Applications file nahi mili"
-            });
-
-        }
-
-        const data = fs.readFileSync(file, "utf8");
-
-        let applications = [];
-
-        if (data.trim() !== "") {
-            applications = JSON.parse(data);
-        }
-
-        const index = applications.findIndex(function (app) {
-
-            return app.mobile === mobile;
-
-        });
-
-        if (index === -1) {
-
-            return res.status(404).json({
-                success: false,
-                message: "Application nahi mili"
-            });
-
-        }
-
-        applications[index].status = status;
-
-        fs.writeFileSync(
-            file,
-            JSON.stringify(applications, null, 2)
-        );
-
-        res.json({
-            success: true,
-            message: "Status updated successfully"
-        });
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Status update nahi hua"
-        });
-
-    }
-
-});
-
-
-// ==============================
-// UPDATE DEMO CHARGES
-// ==============================
-
-app.post("/update-charges", function (req, res) {
-
-    try {
-
-        const mobile = req.body.mobile;
-        const charges = req.body.charges;
-
-        const file = path.join(__dirname, "applications.json");
-
-        if (!fs.existsSync(file)) {
-
-            return res.status(404).json({
-                success: false,
-                message: "Applications file nahi mili"
-            });
-
-        }
-
-        const data = fs.readFileSync(file, "utf8");
-
-        let applications = [];
-
-        if (data.trim() !== "") {
-            applications = JSON.parse(data);
-        }
-
-        const index = applications.findIndex(function (app) {
-
-            return app.mobile === mobile;
-
-        });
-
-        if (index === -1) {
-
-            return res.status(404).json({
-                success: false,
-                message: "Application nahi mili"
-            });
-
-        }
-
-
-        // DEMO CHARGES SAVE
-
-        applications[index].processingFee =
-            charges.processingFee || "";
-
-        applications[index].tds =
-            charges.tds || "";
-
-        applications[index].rbiCharge =
-            charges.rbiCharge || "";
-
-        applications[index].gst =
-            charges.gst || "";
-
-        applications[index].nocCharge =
-            charges.nocCharge || "";
-
-        applications[index].verificationCharge =
-            charges.verificationCharge || "";
-
-        applications[index].documentationCharge =
-            charges.documentationCharge || "";
-
-        applications[index].insuranceCharge =
-            charges.insuranceCharge || "";
-
-        applications[index].accountHoldCharge =
-            charges.accountHoldCharge || "";
-
-        applications[index].otherCharge =
-            charges.otherCharge || "";
-
-
-        fs.writeFileSync(
-            file,
-            JSON.stringify(applications, null, 2)
-        );
-
-
-        res.json({
-            success: true,
-            message: "Charges updated successfully"
-        });
-
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Charges update nahi hua"
-        });
-
-    }
-
-});
-// ==============================
-// DEMO ACCOUNT DETAILS
-// ==============================
-
-app.post("/save-account-details", function (req, res) {
-
-    try {
-
-        const file =
-            path.join(__dirname, "demo-account.json");
-
-        const accountDetails = {
-
-            accountHolderName:
-                req.body.accountHolderName || "",
-
-            bankName:
-                req.body.bankName || "",
-
-            accountNumber:
-                req.body.accountNumber || "",
-
-            ifscCode:
-                req.body.ifscCode || "",
-
-            upiId:
-                req.body.upiId || ""
-
-        };
-
-        fs.writeFileSync(
-            file,
-            JSON.stringify(
-                accountDetails,
-                null,
-                2
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS applications (
+                id SERIAL PRIMARY KEY,
+                mobile TEXT,
+                data JSONB NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        );
+        `);
 
-        res.json({
-            success: true,
-            message: "Demo account details saved successfully"
-        });
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS demo_account (
+                id INTEGER PRIMARY KEY,
+                account_details JSONB NOT NULL
+            )
+        `);
+
+
+        await migrateOldApplications();
+
+        await migrateOldAccount();
+
+
+        console.log("PostgreSQL database ready");
 
     } catch (error) {
 
-        console.log(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Account details save nahi hui"
-        });
+        console.log(
+            "Database setup error:",
+            error
+        );
 
     }
+}
 
-});
 
+// ==================================================
+// OLD APPLICATIONS JSON -> DATABASE
+// ==================================================
 
-// ==============================
-// GET DEMO ACCOUNT DETAILS
-// ==============================
-
-app.get("/account-details", function (req, res) {
+async function migrateOldApplications() {
 
     try {
 
         const file =
-            path.join(__dirname, "demo-account.json");
+            path.join(__dirname, "applications.json");
+
 
         if (!fs.existsSync(file)) {
-
-            return res.json({
-                success: true,
-                accountDetails: {}
-            });
-
+            return;
         }
+
+
+        const result =
+            await pool.query(
+                "SELECT COUNT(*) FROM applications"
+            );
+
+
+        const count =
+            Number(result.rows[0].count);
+
+
+        if (count > 0) {
+            return;
+        }
+
 
         const data =
             fs.readFileSync(
@@ -429,46 +115,1174 @@ app.get("/account-details", function (req, res) {
                 "utf8"
             );
 
-        const accountDetails =
-            data.trim() === ""
-                ? {}
-                : JSON.parse(data);
 
-        res.json({
+        if (data.trim() === "") {
+            return;
+        }
 
-            success: true,
 
-            accountDetails:
-                accountDetails
+        const applications =
+            JSON.parse(data);
 
-        });
+
+        if (!Array.isArray(applications)) {
+            return;
+        }
+
+
+        for (const application of applications) {
+
+            await pool.query(
+                `
+                INSERT INTO applications
+                (mobile, data)
+                VALUES ($1, $2)
+                `,
+                [
+                    application.mobile || "",
+                    application
+                ]
+            );
+
+        }
+
+
+        console.log(
+            applications.length +
+            " old applications migrated"
+        );
+
 
     } catch (error) {
 
-        console.log(error);
-
-        res.status(500).json({
-
-            success: false,
-
-            message:
-                "Account details load nahi hui"
-
-        });
+        console.log(
+            "Application migration error:",
+            error
+        );
 
     }
 
-});
+}
 
 
-// ==============================
-// START SERVER
-// ==============================
+// ==================================================
+// OLD ACCOUNT JSON -> DATABASE
+// ==================================================
 
-const PORT = process.env.PORT || 3000;
+async function migrateOldAccount() {
 
-app.listen(PORT, "0.0.0.0", function () {
-    console.log(
-        "Server is running on port " + PORT
+    try {
+
+        const file =
+            path.join(
+                __dirname,
+                "demo-account.json"
+            );
+
+
+        if (!fs.existsSync(file)) {
+            return;
+        }
+
+
+        const result =
+            await pool.query(
+                "SELECT COUNT(*) FROM demo_account"
+            );
+
+
+        const count =
+            Number(result.rows[0].count);
+
+
+        if (count > 0) {
+            return;
+        }
+
+
+        const data =
+            fs.readFileSync(
+                file,
+                "utf8"
+            );
+
+
+        if (data.trim() === "") {
+            return;
+        }
+
+
+        const accountDetails =
+            JSON.parse(data);
+
+
+        await pool.query(
+            `
+            INSERT INTO demo_account
+            (id, account_details)
+            VALUES (1, $1)
+            `,
+            [accountDetails]
+        );
+
+
+        console.log(
+            "Old demo account migrated"
+        );
+
+
+    } catch (error) {
+
+        console.log(
+            "Account migration error:",
+            error
+        );
+
+    }
+
+}
+
+
+// ==================================================
+// HOME
+// ==================================================
+
+app.get("/", function (req, res) {
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            "index.html"
+        )
     );
+
 });
+
+
+// ==================================================
+// SAVE APPLICATION
+// ==================================================
+
+app.post(
+    "/submit-application",
+    async function (req, res) {
+
+        try {
+
+            const application =
+                req.body;
+
+
+            // PostgreSQL
+            if (process.env.DATABASE_URL) {
+
+                await pool.query(
+                    `
+                    INSERT INTO applications
+                    (mobile, data)
+                    VALUES ($1, $2)
+                    `,
+                    [
+                        application.mobile || "",
+                        application
+                    ]
+                );
+
+
+            } else {
+
+                // Local fallback
+
+                const file =
+                    path.join(
+                        __dirname,
+                        "applications.json"
+                    );
+
+
+                let applications = [];
+
+
+                if (fs.existsSync(file)) {
+
+                    const data =
+                        fs.readFileSync(
+                            file,
+                            "utf8"
+                        );
+
+
+                    if (data.trim() !== "") {
+
+                        applications =
+                            JSON.parse(data);
+
+                    }
+
+                }
+
+
+                applications.push(
+                    application
+                );
+
+
+                fs.writeFileSync(
+                    file,
+                    JSON.stringify(
+                        applications,
+                        null,
+                        2
+                    )
+                );
+
+            }
+
+
+            res.json({
+
+                success: true,
+
+                message:
+                    "Application saved successfully"
+
+            });
+
+
+        } catch (error) {
+
+            console.log(error);
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Application save nahi hui"
+
+            });
+
+        }
+
+    }
+);
+
+
+// ==================================================
+// GET APPLICATIONS
+// ==================================================
+
+app.get(
+    "/applications",
+    async function (req, res) {
+
+        try {
+
+            if (process.env.DATABASE_URL) {
+
+                const result =
+                    await pool.query(
+                        `
+                        SELECT data
+                        FROM applications
+                        ORDER BY id DESC
+                        `
+                    );
+
+
+                const applications =
+                    result.rows.map(
+                        function (row) {
+                            return row.data;
+                        }
+                    );
+
+
+                return res.json(
+                    applications
+                );
+
+            }
+
+
+            // Local JSON fallback
+
+            const file =
+                path.join(
+                    __dirname,
+                    "applications.json"
+                );
+
+
+            if (!fs.existsSync(file)) {
+                return res.json([]);
+            }
+
+
+            const data =
+                fs.readFileSync(
+                    file,
+                    "utf8"
+                );
+
+
+            if (data.trim() === "") {
+                return res.json([]);
+            }
+
+
+            const applications =
+                JSON.parse(data);
+
+
+            res.json(
+                applications
+            );
+
+
+        } catch (error) {
+
+            console.log(error);
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Applications load nahi hui"
+
+            });
+
+        }
+
+    }
+);
+
+
+// ==================================================
+// CHECK APPLICATION
+// ==================================================
+
+app.get(
+    "/check-application",
+    async function (req, res) {
+
+        try {
+
+            const mobile =
+                req.query.mobile;
+
+
+            if (process.env.DATABASE_URL) {
+
+                const result =
+                    await pool.query(
+                        `
+                        SELECT data
+                        FROM applications
+                        WHERE mobile = $1
+                        ORDER BY id DESC
+                        LIMIT 1
+                        `,
+                        [mobile]
+                    );
+
+
+                if (
+                    result.rows.length === 0
+                ) {
+
+                    return res.json({
+                        success: false
+                    });
+
+                }
+
+
+                return res.json({
+
+                    success: true,
+
+                    application:
+                        result.rows[0].data
+
+                });
+
+            }
+
+
+            // Local JSON fallback
+
+            const file =
+                path.join(
+                    __dirname,
+                    "applications.json"
+                );
+
+
+            if (!fs.existsSync(file)) {
+
+                return res.json({
+                    success: false
+                });
+
+            }
+
+
+            const data =
+                fs.readFileSync(
+                    file,
+                    "utf8"
+                );
+
+
+            if (data.trim() === "") {
+
+                return res.json({
+                    success: false
+                });
+
+            }
+
+
+            const applications =
+                JSON.parse(data);
+
+
+            const application =
+                applications.find(
+                    function (app) {
+
+                        return app.mobile === mobile;
+
+                    }
+                );
+
+
+            if (application) {
+
+                res.json({
+
+                    success: true,
+
+                    application:
+                        application
+
+                });
+
+            } else {
+
+                res.json({
+
+                    success: false
+
+                });
+
+            }
+
+
+        } catch (error) {
+
+            console.log(error);
+
+
+            res.status(500).json({
+
+                success: false
+
+            });
+
+        }
+
+    }
+);
+
+
+// ==================================================
+// PART 1 ENDS HERE
+// PART 2 WILL START FROM HERE
+// ==================================================
+// ==================================================
+// UPDATE APPLICATION STATUS
+// ==================================================
+
+app.post(
+    "/update-status",
+    async function (req, res) {
+
+        try {
+
+            const mobile =
+                req.body.mobile;
+
+            const status =
+                req.body.status;
+
+
+            if (process.env.DATABASE_URL) {
+
+                const result =
+                    await pool.query(
+                        `
+                        SELECT id, data
+                        FROM applications
+                        WHERE mobile = $1
+                        ORDER BY id DESC
+                        LIMIT 1
+                        `,
+                        [mobile]
+                    );
+
+
+                if (result.rows.length === 0) {
+
+                    return res.status(404).json({
+
+                        success: false,
+
+                        message:
+                            "Application nahi mili"
+
+                    });
+
+                }
+
+
+                const application =
+                    result.rows[0].data;
+
+
+                application.status =
+                    status;
+
+
+                await pool.query(
+                    `
+                    UPDATE applications
+                    SET data = $1
+                    WHERE id = $2
+                    `,
+                    [
+                        application,
+                        result.rows[0].id
+                    ]
+                );
+
+
+                return res.json({
+
+                    success: true,
+
+                    message:
+                        "Status updated successfully"
+
+                });
+
+            }
+
+
+            // Local JSON fallback
+
+            const file =
+                path.join(
+                    __dirname,
+                    "applications.json"
+                );
+
+
+            if (!fs.existsSync(file)) {
+
+                return res.status(404).json({
+
+                    success: false,
+
+                    message:
+                        "Applications file nahi mili"
+
+                });
+
+            }
+
+
+            const data =
+                fs.readFileSync(
+                    file,
+                    "utf8"
+                );
+
+
+            let applications = [];
+
+
+            if (data.trim() !== "") {
+
+                applications =
+                    JSON.parse(data);
+
+            }
+
+
+            const index =
+                applications.findIndex(
+                    function (app) {
+
+                        return app.mobile === mobile;
+
+                    }
+                );
+
+
+            if (index === -1) {
+
+                return res.status(404).json({
+
+                    success: false,
+
+                    message:
+                        "Application nahi mili"
+
+                });
+
+            }
+
+
+            applications[index].status =
+                status;
+
+
+            fs.writeFileSync(
+                file,
+                JSON.stringify(
+                    applications,
+                    null,
+                    2
+                )
+            );
+
+
+            res.json({
+
+                success: true,
+
+                message:
+                    "Status updated successfully"
+
+            });
+
+
+        } catch (error) {
+
+            console.log(error);
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Status update nahi hua"
+
+            });
+
+        }
+
+    }
+);
+
+
+// ==================================================
+// UPDATE DEMO CHARGES
+// ==================================================
+
+app.post(
+    "/update-charges",
+    async function (req, res) {
+
+        try {
+
+            const mobile =
+                req.body.mobile;
+
+            const charges =
+                req.body.charges || {};
+
+
+            if (process.env.DATABASE_URL) {
+
+                const result =
+                    await pool.query(
+                        `
+                        SELECT id, data
+                        FROM applications
+                        WHERE mobile = $1
+                        ORDER BY id DESC
+                        LIMIT 1
+                        `,
+                        [mobile]
+                    );
+
+
+                if (result.rows.length === 0) {
+
+                    return res.status(404).json({
+
+                        success: false,
+
+                        message:
+                            "Application nahi mili"
+
+                    });
+
+                }
+
+
+                const application =
+                    result.rows[0].data;
+
+
+                application.processingFee =
+                    charges.processingFee || "";
+
+                application.tds =
+                    charges.tds || "";
+
+                application.rbiCharge =
+                    charges.rbiCharge || "";
+
+                application.gst =
+                    charges.gst || "";
+
+                application.nocCharge =
+                    charges.nocCharge || "";
+
+                application.verificationCharge =
+                    charges.verificationCharge || "";
+
+                application.documentationCharge =
+                    charges.documentationCharge || "";
+
+                application.insuranceCharge =
+                    charges.insuranceCharge || "";
+
+                application.accountHoldCharge =
+                    charges.accountHoldCharge || "";
+
+                application.otherCharge =
+                    charges.otherCharge || "";
+
+
+                await pool.query(
+                    `
+                    UPDATE applications
+                    SET data = $1
+                    WHERE id = $2
+                    `,
+                    [
+                        application,
+                        result.rows[0].id
+                    ]
+                );
+
+
+                return res.json({
+
+                    success: true,
+
+                    message:
+                        "Charges updated successfully"
+
+                });
+
+            }
+
+
+            // Local JSON fallback
+
+            const file =
+                path.join(
+                    __dirname,
+                    "applications.json"
+                );
+
+
+            if (!fs.existsSync(file)) {
+
+                return res.status(404).json({
+
+                    success: false,
+
+                    message:
+                        "Applications file nahi mili"
+
+                });
+
+            }
+
+
+            const data =
+                fs.readFileSync(
+                    file,
+                    "utf8"
+                );
+
+
+            let applications = [];
+
+
+            if (data.trim() !== "") {
+
+                applications =
+                    JSON.parse(data);
+
+            }
+
+
+            const index =
+                applications.findIndex(
+                    function (app) {
+
+                        return app.mobile === mobile;
+
+                    }
+                );
+
+
+            if (index === -1) {
+
+                return res.status(404).json({
+
+                    success: false,
+
+                    message:
+                        "Application nahi mili"
+
+                });
+
+            }
+
+
+            applications[index].processingFee =
+                charges.processingFee || "";
+
+            applications[index].tds =
+                charges.tds || "";
+
+            applications[index].rbiCharge =
+                charges.rbiCharge || "";
+
+            applications[index].gst =
+                charges.gst || "";
+
+            applications[index].nocCharge =
+                charges.nocCharge || "";
+
+            applications[index].verificationCharge =
+                charges.verificationCharge || "";
+
+            applications[index].documentationCharge =
+                charges.documentationCharge || "";
+
+            applications[index].insuranceCharge =
+                charges.insuranceCharge || "";
+
+            applications[index].accountHoldCharge =
+                charges.accountHoldCharge || "";
+
+            applications[index].otherCharge =
+                charges.otherCharge || "";
+
+
+            fs.writeFileSync(
+                file,
+                JSON.stringify(
+                    applications,
+                    null,
+                    2
+                )
+            );
+
+
+            res.json({
+
+                success: true,
+
+                message:
+                    "Charges updated successfully"
+
+            });
+
+
+        } catch (error) {
+
+            console.log(error);
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Charges update nahi hua"
+
+            });
+
+        }
+
+    }
+);
+
+
+// ==================================================
+// SAVE DEMO ACCOUNT DETAILS
+// ==================================================
+
+app.post(
+    "/save-account-details",
+    async function (req, res) {
+
+        try {
+
+            const accountDetails = {
+
+                accountHolderName:
+                    req.body.accountHolderName || "",
+
+                bankName:
+                    req.body.bankName || "",
+
+                accountNumber:
+                    req.body.accountNumber || "",
+
+                ifscCode:
+                    req.body.ifscCode || "",
+
+                upiId:
+                    req.body.upiId || ""
+
+            };
+
+
+            if (process.env.DATABASE_URL) {
+
+                await pool.query(
+                    `
+                    INSERT INTO demo_account
+                    (id, account_details)
+                    VALUES (1, $1)
+                    ON CONFLICT (id)
+                    DO UPDATE SET
+                    account_details = EXCLUDED.account_details
+                    `,
+                    [accountDetails]
+                );
+
+
+                return res.json({
+
+                    success: true,
+
+                    message:
+                        "Demo account details saved successfully"
+
+                });
+
+            }
+
+
+            // Local JSON fallback
+
+            const file =
+                path.join(
+                    __dirname,
+                    "demo-account.json"
+                );
+
+
+            fs.writeFileSync(
+                file,
+                JSON.stringify(
+                    accountDetails,
+                    null,
+                    2
+                )
+            );
+
+
+            res.json({
+
+                success: true,
+
+                message:
+                    "Demo account details saved successfully"
+
+            });
+
+
+        } catch (error) {
+
+            console.log(error);
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Account details save nahi hui"
+
+            });
+
+        }
+
+    }
+);
+
+
+// ==================================================
+// GET DEMO ACCOUNT DETAILS
+// ==================================================
+
+app.get(
+    "/account-details",
+    async function (req, res) {
+
+        try {
+
+            if (process.env.DATABASE_URL) {
+
+                const result =
+                    await pool.query(
+                        `
+                        SELECT account_details
+                        FROM demo_account
+                        WHERE id = 1
+                        LIMIT 1
+                        `
+                    );
+
+
+                if (result.rows.length === 0) {
+
+                    return res.json({
+
+                        success: true,
+
+                        accountDetails: {}
+
+                    });
+
+                }
+
+
+                return res.json({
+
+                    success: true,
+
+                    accountDetails:
+                        result.rows[0].account_details
+
+                });
+
+            }
+
+
+            // Local JSON fallback
+
+            const file =
+                path.join(
+                    __dirname,
+                    "demo-account.json"
+                );
+
+
+            if (!fs.existsSync(file)) {
+
+                return res.json({
+
+                    success: true,
+
+                    accountDetails: {}
+
+                });
+
+            }
+
+
+            const data =
+                fs.readFileSync(
+                    file,
+                    "utf8"
+                );
+
+
+            const accountDetails =
+                data.trim() === ""
+                    ? {}
+                    : JSON.parse(data);
+
+
+            res.json({
+
+                success: true,
+
+                accountDetails:
+                    accountDetails
+
+            });
+
+
+        } catch (error) {
+
+            console.log(error);
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Account details load nahi hui"
+
+            });
+
+        }
+
+    }
+);
+
+
+// ==================================================
+// START SERVER
+// ==================================================
+
+const PORT =
+    process.env.PORT || 3000;
+
+
+setupDatabase()
+    .then(function () {
+
+        app.listen(
+            PORT,
+            "0.0.0.0",
+            function () {
+
+                console.log(
+                    "Server is running on port " +
+                    PORT
+                );
+
+            }
+        );
+
+    })
+    .catch(function (error) {
+
+        console.log(
+            "Server startup error:",
+            error
+        );
+
+    });
