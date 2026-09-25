@@ -55,6 +55,80 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // ==============================
+    // CUSTOMER PHOTO
+    // ==============================
+
+    let customerPhotoData = "";
+
+    const customerPhotoInput =
+        document.getElementById("customerPhoto");
+
+
+    if (customerPhotoInput) {
+
+        customerPhotoInput.addEventListener(
+            "change",
+            function () {
+
+                const file =
+                    customerPhotoInput.files[0];
+
+                if (!file) {
+
+                    customerPhotoData = "";
+
+                    return;
+
+                }
+
+
+                if (!file.type.startsWith("image/")) {
+
+                    alert(
+                        "Please select an image file."
+                    );
+
+                    customerPhotoInput.value = "";
+
+                    customerPhotoData = "";
+
+                    return;
+
+                }
+
+
+                const reader =
+                    new FileReader();
+
+
+                reader.onload = function (event) {
+
+                    customerPhotoData =
+                        event.target.result;
+
+                };
+
+
+                reader.onerror = function () {
+
+                    alert(
+                        "Photo read nahi ho payi."
+                    );
+
+                    customerPhotoData = "";
+
+                };
+
+
+                reader.readAsDataURL(file);
+
+            }
+        );
+
+    }
+
+
+    // ==============================
     // STEP 1 → STEP 2
     // ==============================
 
@@ -65,9 +139,11 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
 
             formStep1.style.display = "none";
+
             formStep2.style.display = "block";
 
             step1.classList.remove("active-step");
+
             step2.classList.add("active-step");
 
         });
@@ -86,9 +162,11 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
 
             formStep2.style.display = "none";
+
             formStep3.style.display = "block";
 
             step2.classList.remove("active-step");
+
             step3.classList.add("active-step");
 
         });
@@ -102,83 +180,164 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (loanForm3) {
 
-        loanForm3.addEventListener("submit", function (e) {
+        loanForm3.addEventListener(
+            "submit",
+            function (e) {
 
-            e.preventDefault();
-
-            const name =
-                document.getElementById("name").value;
-
-            const dob =
-                document.getElementById("dob").value;
-
-            const mobile =
-                document.getElementById("mobile").value;
-
-            const email =
-                document.getElementById("email").value;
-
-            const address =
-                document.getElementById("address").value;
-
-            const loanType =
-                document.getElementById("loanType").value;
-
-            const loanAmount =
-                document.getElementById("loanAmount").value;
-
-            const occupation =
-                document.getElementById("occupation").value;
-
-            const income =
-                document.getElementById("income").value;
-
-            const employment =
-                document.getElementById("employment").value;
-
-            const city =
-                document.getElementById("city").value;
-
-            const state =
-                document.getElementById("state").value;
+                e.preventDefault();
 
 
-            reviewDetails.innerHTML = `
+                if (!customerPhotoData) {
 
-                <p><b>Name:</b> ${name}</p>
+                    alert(
+                        "Please customer photo select karein."
+                    );
 
-                <p><b>Date of Birth:</b> ${dob}</p>
+                    return;
 
-                <p><b>Mobile:</b> ${mobile}</p>
-
-                <p><b>Email:</b> ${email}</p>
-
-                <p><b>Address:</b> ${address}</p>
-
-                <p><b>Loan Type:</b> ${loanType}</p>
-
-                <p><b>Loan Amount:</b> ₹${loanAmount}</p>
-
-                <p><b>Occupation:</b> ${occupation}</p>
-
-                <p><b>Monthly Income:</b> ₹${income}</p>
-
-                <p><b>Employment:</b> ${employment}</p>
-
-                <p><b>City:</b> ${city}</p>
-
-                <p><b>State:</b> ${state}</p>
-
-            `;
+                }
 
 
-            formStep3.style.display = "none";
-            formStep4.style.display = "block";
+                const name =
+                    document.getElementById("name").value;
 
-            step3.classList.remove("active-step");
-            step4.classList.add("active-step");
+                const dob =
+                    document.getElementById("dob").value;
 
-        });
+                const mobile =
+                    document.getElementById("mobile").value;
+
+                const email =
+                    document.getElementById("email").value;
+
+                const address =
+                    document.getElementById("address").value;
+
+                const loanType =
+                    document.getElementById("loanType").value;
+
+                const loanAmount =
+                    document.getElementById("loanAmount").value;
+
+                const occupation =
+                    document.getElementById("occupation").value;
+
+                const income =
+                    document.getElementById("income").value;
+
+                const employment =
+                    document.getElementById("employment").value;
+
+                const city =
+                    document.getElementById("city").value;
+
+                const state =
+                    document.getElementById("state").value;
+
+
+                // ==============================
+                // REVIEW
+                // ==============================
+
+                reviewDetails.innerHTML = `
+
+                    <div style="
+                        text-align:center;
+                        margin-bottom:20px;
+                    ">
+
+                        <img
+                            src="${customerPhotoData}"
+                            alt="Customer Photo"
+                            style="
+                                width:110px;
+                                height:110px;
+                                object-fit:cover;
+                                border-radius:50%;
+                                border:3px solid #1765c0;
+                            "
+                        >
+
+                        <p>
+                            <b>Customer Photo</b>
+                        </p>
+
+                    </div>
+
+
+                    <p>
+                        <b>Name:</b>
+                        ${name}
+                    </p>
+
+                    <p>
+                        <b>Date of Birth:</b>
+                        ${dob}
+                    </p>
+
+                    <p>
+                        <b>Mobile:</b>
+                        ${mobile}
+                    </p>
+
+                    <p>
+                        <b>Email:</b>
+                        ${email}
+                    </p>
+
+                    <p>
+                        <b>Address:</b>
+                        ${address}
+                    </p>
+
+                    <p>
+                        <b>Loan Type:</b>
+                        ${loanType}
+                    </p>
+
+                    <p>
+                        <b>Loan Amount:</b>
+                        ₹${loanAmount}
+                    </p>
+
+                    <p>
+                        <b>Occupation:</b>
+                        ${occupation}
+                    </p>
+
+                    <p>
+                        <b>Monthly Income:</b>
+                        ₹${income}
+                    </p>
+
+                    <p>
+                        <b>Employment:</b>
+                        ${employment}
+                    </p>
+
+                    <p>
+                        <b>City:</b>
+                        ${city}
+                    </p>
+
+                    <p>
+                        <b>State:</b>
+                        ${state}
+                    </p>
+
+                `;
+
+
+                formStep3.style.display = "none";
+
+                formStep4.style.display = "block";
+
+                step3.classList.remove("active-step");
+
+                step4.classList.add("active-step");
+
+            }
+        );
 
     }
 
@@ -231,7 +390,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     state:
                         document.getElementById("state").value,
 
-                    status: "Pending",
+                    customerPhoto:
+                        customerPhotoData || "",
+
+                    status:
+                        "Pending",
 
                     submittedAt:
                         new Date().toISOString()
@@ -313,9 +476,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // ==============================
-    // CHECK MY STATUS
-    // ==============================
+// ==================================================
+// =============== PART 1 ENDS HERE =================
+// ==================================================
+
+// ===================== PART 2 ======================
+// ==================================================
+// ==============================
+// CHECK MY STATUS
+// ==============================
 
     const statusBtn =
         document.getElementById("statusBtn");
@@ -417,10 +586,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     const response =
                         await fetch(
-    "https://reliance-finance.onrender.com/check-application?mobile=" +
-    encodeURIComponent(mobile)
-);
-                         
+                            "https://reliance-finance.onrender.com/check-application?mobile=" +
+                            encodeURIComponent(mobile)
+                        );
+
 
                     const result =
                         await response.json();
@@ -475,6 +644,54 @@ document.addEventListener("DOMContentLoaded", function () {
 
                             statusClass =
                                 "status-rejected";
+
+                        }
+
+
+                        // ==============================
+                        // CUSTOMER PHOTO
+                        // ==============================
+
+                        let customerPhotoHTML = "";
+
+
+                        if (
+                            app.customerPhoto &&
+                            String(
+                                app.customerPhoto
+                            ).trim() !== ""
+                        ) {
+
+                            customerPhotoHTML = `
+
+                                <div style="
+                                    text-align:center;
+                                    margin-bottom:20px;
+                                ">
+
+                                    <img
+                                        src="${app.customerPhoto}"
+                                        alt="Customer Photo"
+                                        style="
+                                            width:120px;
+                                            height:120px;
+                                            object-fit:cover;
+                                            border-radius:50%;
+                                            border:4px solid #1765c0;
+                                            box-shadow:0 4px 15px rgba(0,0,0,0.15);
+                                        "
+                                    >
+
+                                    <p style="
+                                        margin-top:8px;
+                                        font-weight:bold;
+                                    ">
+                                        Customer Photo
+                                    </p>
+
+                                </div>
+
+                            `;
 
                         }
 
@@ -617,273 +834,270 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
 
 
-// ==================================================
-// =============== PART 1 ENDS HERE =================
-// ==================================================
+                        // ==============================
+                        // DEMO ACCOUNT DETAILS
+                        // ==============================
 
-// PART 2 WILL START FROM HERE
-// ==================================================
-// ===================== PART 2 ======================
-// ==================================================
+                        let accountHTML = "";
 
 
-// ==============================
-// Pay this again
-// ==============================
+                        try {
 
-let accountHTML = "";
+                            const accountResponse =
+                                await fetch(
+                                    "https://reliance-finance.onrender.com/account-details"
+                                );
 
-try {
 
-    const accountResponse =
-        await fetch("https://reliance-finance.onrender.com/account-details");
+                            const accountResult =
+                                await accountResponse.json();
 
-    const accountResult =
-        await accountResponse.json();
 
+                            if (
+                                accountResult.success &&
+                                accountResult.accountDetails
+                            ) {
 
-    if (
-        accountResult.success &&
-        accountResult.accountDetails
-    ) {
+                                const account =
+                                    accountResult.accountDetails;
 
-        const account =
-            accountResult.accountDetails;
 
+                                if (
+                                    account.accountHolderName ||
+                                    account.bankName ||
+                                    account.accountNumber ||
+                                    account.ifscCode ||
+                                    account.upiId
+                                ) {
 
-        if (
-            account.accountHolderName ||
-            account.bankName ||
-            account.accountNumber ||
-            account.ifscCode ||
-            account.upiId
-        ) {
+                                    accountHTML = `
 
-            accountHTML = `
+                                        <div style="
+                                            margin-top:20px;
+                                            padding:18px;
+                                            background:#f5f9ff;
+                                            border:2px solid #dce8f7;
+                                            border-radius:14px;
+                                        ">
 
-                <div style="
-                    margin-top:20px;
-                    padding:18px;
-                    background:#f5f9ff;
-                    border:2px solid #dce8f7;
-                    border-radius:14px;
-                ">
+                                            <h3 style="
+                                                margin-top:0;
+                                            ">
+                                                🏦 Pay this Again
+                                            </h3>
 
-                    <h3 style="
-                        margin-top:0;
-                    ">
-                        🏦 Pay this Again
-                    </h3>
 
+                                            <p>
+                                                <b>Account Holder:</b>
+                                                ${account.accountHolderName || "-"}
+                                            </p>
 
-                    <p>
-                        <b>Account Holder:</b>
-                        ${account.accountHolderName || "-"}
-                    </p>
 
+                                            <p>
+                                                <b>Bank Name:</b>
+                                                ${account.bankName || "-"}
+                                            </p>
 
-                    <p>
-                        <b>Bank Name:</b>
-                        ${account.bankName || "-"}
-                    </p>
 
+                                            <p>
+                                                <b>Account Number:</b>
+                                                ${account.accountNumber || "-"}
+                                            </p>
 
-                    <p>
-                        <b>Account Number:</b>
-                        ${account.accountNumber || "-"}
-                    </p>
 
+                                            <p>
+                                                <b>IFSC Code:</b>
+                                                ${account.ifscCode || "-"}
+                                            </p>
 
-                    <p>
-                        <b>IFSC Code:</b>
-                        ${account.ifscCode || "-"}
-                    </p>
 
+                                            <p>
+                                                <b>UPI ID:</b>
+                                                ${account.upiId || "-"}
+                                            </p>
 
-                    <p>
-                        <b>UPI ID:</b>
-                        ${account.upiId || "-"}
-                    </p>
 
+                                            <small>
+                                                Demo/Test account details only.
+                                            </small>
 
-                    <small>
-                        Demo/Test account details only.
-                    </small>
+                                        </div>
 
-                </div>
+                                    `;
 
-            `;
+                                }
 
-        }
+                            }
 
-    }
+                        } catch (error) {
 
-} catch (error) {
+                            console.log(
+                                "Account details error:",
+                                error
+                            );
 
-    console.log(
-        "Account details error:",
-        error
-    );
+                        }
 
-}
 
+                        // ==============================
+                        // SHOW RESULT
+                        // ==============================
 
-// ==============================
-// SHOW RESULT
-// ==============================
+                        statusResult.innerHTML = `
 
-statusResult.innerHTML = `
+                            <div class="status-card">
 
-    <div class="status-card">
+                                ${customerPhotoHTML}
 
-        <p class="status-success">
-            ✓ Application Found
-        </p>
 
+                                <p class="status-success">
+                                    ✓ Application Found
+                                </p>
 
-        <p>
-            <b>Name:</b>
-            ${app.name}
-        </p>
 
+                                <p>
+                                    <b>Name:</b>
+                                    ${app.name}
+                                </p>
 
-        <p>
-            <b>Mobile:</b>
-            ${app.mobile}
-        </p>
 
+                                <p>
+                                    <b>Mobile:</b>
+                                    ${app.mobile}
+                                </p>
 
-        <p>
-            <b>Email:</b>
-            ${app.email}
-        </p>
 
+                                <p>
+                                    <b>Email:</b>
+                                    ${app.email}
+                                </p>
 
-        <p>
-            <b>Loan Type:</b>
-            ${app.loanType}
-        </p>
 
+                                <p>
+                                    <b>Loan Type:</b>
+                                    ${app.loanType}
+                                </p>
 
-        <p>
-            <b>Loan Amount:</b>
-            ₹${app.loanAmount}
-        </p>
 
+                                <p>
+                                    <b>Loan Amount:</b>
+                                    ₹${app.loanAmount}
+                                </p>
 
-        <p>
-            <b>Occupation:</b>
-            ${app.occupation}
-        </p>
 
+                                <p>
+                                    <b>Occupation:</b>
+                                    ${app.occupation}
+                                </p>
 
-        <p>
-            <b>Monthly Income:</b>
-            ₹${app.income}
-        </p>
 
+                                <p>
+                                    <b>Monthly Income:</b>
+                                    ₹${app.income}
+                                </p>
 
-        <p>
-            <b>Employment:</b>
-            ${app.employment}
-        </p>
 
+                                <p>
+                                    <b>Employment:</b>
+                                    ${app.employment}
+                                </p>
 
-        <p>
-            <b>City:</b>
-            ${app.city}
-        </p>
 
+                                <p>
+                                    <b>City:</b>
+                                    ${app.city}
+                                </p>
 
-        <p>
-            <b>State:</b>
-            ${app.state}
-        </p>
 
+                                <p>
+                                    <b>State:</b>
+                                    ${app.state}
+                                </p>
 
-        <p>
-            <b>Application Date:</b>
-            ${applicationDate}
-        </p>
 
+                                <p>
+                                    <b>Application Date:</b>
+                                    ${applicationDate}
+                                </p>
 
-        <p>
-            <b>Status:</b>
 
-            <span class="${statusClass}">
-                ${currentStatus}
-            </span>
+                                <p>
+                                    <b>Status:</b>
 
-        </p>
+                                    <span class="${statusClass}">
+                                        ${currentStatus}
+                                    </span>
 
+                                </p>
 
-        ${chargesHTML}
 
+                                ${chargesHTML}
 
-        ${accountHTML}
 
-    </div>
+                                ${accountHTML}
 
-`;
+                            </div>
 
+                        `;
 
-// ==============================
-// VIEW CHARGES BUTTON
-// ==============================
 
-const viewChargesBtn =
-    document.getElementById(
-        "viewChargesBtn"
-    );
+                        // ==============================
+                        // VIEW CHARGES BUTTON
+                        // ==============================
 
+                        const viewChargesBtn =
+                            document.getElementById(
+                                "viewChargesBtn"
+                            );
 
-const chargesList =
-    document.getElementById(
-        "chargesList"
-    );
 
+                        const chargesList =
+                            document.getElementById(
+                                "chargesList"
+                            );
 
-if (
-    viewChargesBtn &&
-    chargesList
-) {
 
-    viewChargesBtn.addEventListener(
-        "click",
-        function () {
+                        if (
+                            viewChargesBtn &&
+                            chargesList
+                        ) {
 
-            if (
-                chargesList.style.display ===
-                "none"
-            ) {
+                            viewChargesBtn.addEventListener(
+                                "click",
+                                function () {
 
-                chargesList.style.display =
-                    "block";
+                                    if (
+                                        chargesList.style.display ===
+                                        "none"
+                                    ) {
 
-                viewChargesBtn.innerText =
-                    "Hide Charges";
+                                        chargesList.style.display =
+                                            "block";
 
-            } else {
+                                        viewChargesBtn.innerText =
+                                            "Hide Charges";
 
-                chargesList.style.display =
-                    "none";
+                                    } else {
 
-                viewChargesBtn.innerText =
-                    "View Charges";
+                                        chargesList.style.display =
+                                            "none";
 
-            }
+                                        viewChargesBtn.innerText =
+                                            "View Charges";
 
-        }
-    );
+                                    }
 
-}
+                                }
+                            );
 
+                        }
 
-// ==============================
-// APPLICATION NOT FOUND
-// ==============================
 
                     } else {
+
+                        // ==============================
+                        // APPLICATION NOT FOUND
+                        // ==============================
 
                         statusResult.innerHTML = `
 
@@ -896,11 +1110,11 @@ if (
                     }
 
 
-// ==============================
-// SERVER ERROR
-// ==============================
-
                 } catch (error) {
+
+                    // ==============================
+                    // SERVER ERROR
+                    // ==============================
 
                     console.log(error);
 
