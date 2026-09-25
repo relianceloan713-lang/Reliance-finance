@@ -273,7 +273,6 @@ app.post(
                 req.body;
 
 
-            // PostgreSQL
             if (process.env.DATABASE_URL) {
 
                 await pool.query(
@@ -290,8 +289,6 @@ app.post(
 
 
             } else {
-
-                // Local fallback
 
                 const file =
                     path.join(
@@ -406,8 +403,6 @@ app.get(
             }
 
 
-            // Local JSON fallback
-
             const file =
                 path.join(
                     __dirname,
@@ -513,8 +508,6 @@ app.get(
             }
 
 
-            // Local JSON fallback
-
             const file =
                 path.join(
                     __dirname,
@@ -601,8 +594,8 @@ app.get(
 
 
 // ==================================================
-// PART 1 ENDS HERE
-// PART 2 WILL START FROM HERE
+// PART 1 END
+// PART 2 START FROM HERE
 // ==================================================
 // ==================================================
 // UPDATE APPLICATION STATUS
@@ -682,8 +675,6 @@ app.post(
 
             }
 
-
-            // Local JSON fallback
 
             const file =
                 path.join(
@@ -806,7 +797,7 @@ app.post(
                 req.body.mobile;
 
             const charges =
-                req.body.charges || {};
+                req.body.charges || req.body;
 
 
             if (process.env.DATABASE_URL) {
@@ -897,8 +888,6 @@ app.post(
 
             }
 
-
-            // Local JSON fallback
 
             const file =
                 path.join(
@@ -1035,7 +1024,7 @@ app.post(
 
 
 // ==================================================
-// SAVE DEMO ACCOUNT DETAILS
+// SAVE DEMO ACCOUNT + CONTACT DETAILS
 // ==================================================
 
 app.post(
@@ -1044,25 +1033,146 @@ app.post(
 
         try {
 
-            const accountDetails = {
+            let accountDetails = {};
 
-                accountHolderName:
-                    req.body.accountHolderName || "",
 
-                bankName:
-                    req.body.bankName || "",
+            // LOAD OLD DETAILS
 
-                accountNumber:
-                    req.body.accountNumber || "",
+            if (process.env.DATABASE_URL) {
 
-                ifscCode:
-                    req.body.ifscCode || "",
+                const oldResult =
+                    await pool.query(
+                        `
+                        SELECT account_details
+                        FROM demo_account
+                        WHERE id = 1
+                        LIMIT 1
+                        `
+                    );
 
-                upiId:
-                    req.body.upiId || ""
 
-            };
+                if (oldResult.rows.length > 0) {
 
+                    accountDetails =
+                        oldResult.rows[0].account_details || {};
+
+                }
+
+            } else {
+
+                const file =
+                    path.join(
+                        __dirname,
+                        "demo-account.json"
+                    );
+
+
+                if (fs.existsSync(file)) {
+
+                    const data =
+                        fs.readFileSync(
+                            file,
+                            "utf8"
+                        );
+
+
+                    if (data.trim() !== "") {
+
+                        accountDetails =
+                            JSON.parse(data);
+
+                    }
+
+                }
+
+            }
+
+
+            // ACCOUNT DETAILS
+
+            if (
+                req.body.accountHolderName !== undefined
+            ) {
+
+                accountDetails.accountHolderName =
+                    req.body.accountHolderName || "";
+
+            }
+
+
+            if (
+                req.body.bankName !== undefined
+            ) {
+
+                accountDetails.bankName =
+                    req.body.bankName || "";
+
+            }
+
+
+            if (
+                req.body.accountNumber !== undefined
+            ) {
+
+                accountDetails.accountNumber =
+                    req.body.accountNumber || "";
+
+            }
+
+
+            if (
+                req.body.ifscCode !== undefined
+            ) {
+
+                accountDetails.ifscCode =
+                    req.body.ifscCode || "";
+
+            }
+
+
+            if (
+                req.body.upiId !== undefined
+            ) {
+
+                accountDetails.upiId =
+                    req.body.upiId || "";
+
+            }
+
+
+            // CONTACT DETAILS
+
+            if (
+                req.body.whatsappNumber !== undefined
+            ) {
+
+                accountDetails.whatsappNumber =
+                    req.body.whatsappNumber || "";
+
+            }
+
+
+            if (
+                req.body.helplineNumber !== undefined
+            ) {
+
+                accountDetails.helplineNumber =
+                    req.body.helplineNumber || "";
+
+            }
+
+
+            if (
+                req.body.contactEmail !== undefined
+            ) {
+
+                accountDetails.contactEmail =
+                    req.body.contactEmail || "";
+
+            }
+
+
+            // SAVE TO POSTGRESQL
 
             if (process.env.DATABASE_URL) {
 
@@ -1084,14 +1194,14 @@ app.post(
                     success: true,
 
                     message:
-                        "Demo account details saved successfully"
+                        "Details saved successfully"
 
                 });
 
             }
 
 
-            // Local JSON fallback
+            // LOCAL JSON FALLBACK
 
             const file =
                 path.join(
@@ -1115,14 +1225,17 @@ app.post(
                 success: true,
 
                 message:
-                    "Demo account details saved successfully"
+                    "Details saved successfully"
 
             });
 
 
         } catch (error) {
 
-            console.log(error);
+            console.log(
+                "Save details error:",
+                error
+            );
 
 
             res.status(500).json({
@@ -1130,7 +1243,7 @@ app.post(
                 success: false,
 
                 message:
-                    "Account details save nahi hui"
+                    "Details save nahi hui"
 
             });
 
@@ -1141,7 +1254,7 @@ app.post(
 
 
 // ==================================================
-// GET DEMO ACCOUNT DETAILS
+// GET DEMO ACCOUNT + CONTACT DETAILS
 // ==================================================
 
 app.get(
@@ -1188,7 +1301,7 @@ app.get(
             }
 
 
-            // Local JSON fallback
+            // LOCAL JSON FALLBACK
 
             const file =
                 path.join(
