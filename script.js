@@ -610,7 +610,6 @@ document.addEventListener("DOMContentLoaded", function () {
 // ================= PART 2 START ====================
 // ==================================================
 
-
 // ==============================
 // CHECK MY STATUS
 // ==============================
@@ -633,13 +632,11 @@ const statusMobile =
 const statusResult =
     document.getElementById("statusResult");
 
-
 // ==============================
 // OPEN STATUS
 // ==============================
 
 if (statusBtn && statusModal) {
-
     statusBtn.addEventListener(
         "click",
         function () {
@@ -656,16 +653,13 @@ if (statusBtn && statusModal) {
 
         }
     );
-
 }
-
 
 // ==============================
 // CLOSE STATUS
 // ==============================
 
 if (closeStatusBtn && statusModal) {
-
     closeStatusBtn.addEventListener(
         "click",
         function () {
@@ -674,9 +668,7 @@ if (closeStatusBtn && statusModal) {
 
         }
     );
-
 }
-
 
 // ==============================
 // CHECK STATUS
@@ -691,7 +683,6 @@ if (checkStatusBtn) {
             const mobile =
                 statusMobile.value.trim();
 
-
             if (!/^[0-9]{10}$/.test(mobile)) {
 
                 statusResult.innerHTML = `
@@ -702,16 +693,13 @@ if (checkStatusBtn) {
                 `;
 
                 return;
-
             }
-
 
             statusResult.innerHTML = `
                 <p>
                     Checking application...
                 </p>
             `;
-
 
             try {
 
@@ -721,10 +709,8 @@ if (checkStatusBtn) {
                         encodeURIComponent(mobile)
                     );
 
-
                 const result =
                     await response.json();
-
 
                 if (
                     result.success &&
@@ -734,10 +720,8 @@ if (checkStatusBtn) {
                     const app =
                         result.application;
 
-
                     let applicationDate =
                         "Not available";
-
 
                     if (app.submittedAt) {
 
@@ -750,14 +734,11 @@ if (checkStatusBtn) {
 
                     }
 
-
                     const currentStatus =
                         app.status || "Pending";
 
-
                     let statusClass =
                         "status-pending";
-
 
                     if (
                         currentStatus === "Approved"
@@ -768,7 +749,6 @@ if (checkStatusBtn) {
 
                     }
 
-
                     if (
                         currentStatus === "Rejected"
                     ) {
@@ -778,13 +758,11 @@ if (checkStatusBtn) {
 
                     }
 
-
                     // ==============================
                     // CUSTOMER PHOTO
                     // ==============================
 
                     let customerPhotoHTML = "";
-
 
                     if (
                         app.customerPhoto &&
@@ -794,7 +772,6 @@ if (checkStatusBtn) {
                     ) {
 
                         customerPhotoHTML = `
-
                             <div style="
                                 text-align:center;
                                 margin-bottom:20px;
@@ -819,11 +796,9 @@ if (checkStatusBtn) {
                                 </p>
 
                             </div>
-
                         `;
 
                     }
-
 
                     // ==============================
                     // CHARGES
@@ -883,7 +858,6 @@ if (checkStatusBtn) {
 
                     ];
 
-
                     const activeCharges =
                         charges.filter(
                             function (charge) {
@@ -902,16 +876,13 @@ if (checkStatusBtn) {
                             }
                         );
 
-
                     let chargesHTML = "";
-
 
                     if (
                         activeCharges.length > 0
                     ) {
 
                         chargesHTML = `
-
                             <div
                                 class="demo-charges"
                                 style="margin-top:20px;"
@@ -925,7 +896,6 @@ if (checkStatusBtn) {
                                     View Charges
                                 </button>
 
-
                                 <div
                                     id="chargesList"
                                     style="display:none;"
@@ -935,12 +905,10 @@ if (checkStatusBtn) {
                                         Loan Charge Details
                                     </h3>
 
-
                                     ${activeCharges.map(
                                         function (charge) {
 
                                             return `
-
                                                 <p>
                                                     <b>
                                                         ${charge.name}:
@@ -948,7 +916,6 @@ if (checkStatusBtn) {
 
                                                     ₹${charge.value}
                                                 </p>
-
                                             `;
 
                                         }
@@ -957,18 +924,15 @@ if (checkStatusBtn) {
                                 </div>
 
                             </div>
-
                         `;
 
                     }
-
 
                     // ==============================
                     // DEMO ACCOUNT DETAILS
                     // ==============================
 
                     let accountHTML = "";
-
 
                     try {
 
@@ -977,10 +941,8 @@ if (checkStatusBtn) {
                                 "/account-details"
                             );
 
-
                         const accountResult =
                             await accountResponse.json();
-
 
                         if (
                             accountResult.success &&
@@ -989,7 +951,6 @@ if (checkStatusBtn) {
 
                             const account =
                                 accountResult.accountDetails;
-
 
                             if (
                                 account.accountHolderName ||
@@ -1000,176 +961,151 @@ if (checkStatusBtn) {
                             ) {
 
                                 accountHTML = `
-
-                                    <div style="
-                                        margin-top:20px;
-                                        padding:18px;
-                                        background:#f5f9ff;
-                                        border:2px solid #dce8f7;
-                                        border-radius:14px;
-                                    ">
+                                    <div
+                                        class="demo-account"
+                                        style="margin-top:20px;"
+                                    >
 
                                         <h3>
-                                            🏦 Demo Account Details
+                                            Demo Account Details
                                         </h3>
 
+                                        ${
+                                            account.accountHolderName
+                                                ? `
+                                                    <p>
+                                                        <b>
+                                                            Account Holder:
+                                                        </b>
+                                                        ${account.accountHolderName}
+                                                    </p>
+                                                  `
+                                                : ""
+                                        }
 
-                                        <p>
-                                            <b>
-                                                Account Holder:
-                                            </b>
+                                        ${
+                                            account.bankName
+                                                ? `
+                                                    <p>
+                                                        <b>
+                                                            Bank:
+                                                        </b>
+                                                        ${account.bankName}
+                                                    </p>
+                                                  `
+                                                : ""
+                                        }
 
-                                            ${account.accountHolderName || "-"}
-                                        </p>
+                                        ${
+                                            account.accountNumber
+                                                ? `
+                                                    <p>
+                                                        <b>
+                                                            Account Number:
+                                                        </b>
+                                                        ${account.accountNumber}
+                                                    </p>
+                                                  `
+                                                : ""
+                                        }
 
+                                        ${
+                                            account.ifscCode
+                                                ? `
+                                                    <p>
+                                                        <b>
+                                                            IFSC:
+                                                        </b>
+                                                        ${account.ifscCode}
+                                                    </p>
+                                                  `
+                                                : ""
+                                        }
 
-                                        <p>
-                                            <b>
-                                                Bank Name:
-                                            </b>
+                                        ${
+                                            account.upiId
+                                                ? `
+                                                    <p>
+                                                        <b>
+                                                            UPI ID:
+                                                        </b>
+                                                        ${account.upiId}
+                                                    </p>
+                                                  `
+                                                : ""
+                                        }
 
-                                            ${account.bankName || "-"}
-                                        </p>
-
-
-                                        <p>
-                                            <b>
-                                                Account Number:
-                                            </b>
-
-                                            ${account.accountNumber || "-"}
-                                        </p>
-
-
-                                        <p>
-                                            <b>
-                                                IFSC Code:
-                                            </b>
-
-                                            ${account.ifscCode || "-"}
-                                        </p>
-
-
-                                        <p>
-                                            <b>
-                                                UPI ID:
-                                            </b>
-
-                                            ${account.upiId || "-"}
+                                        <p style="
+                                            color:#b00020;
+                                            font-weight:bold;
+                                        ">
+                                            Demo/Test information only.
+                                            No real payment is required.
                                         </p>
 
                                     </div>
-
                                 `;
 
                             }
 
                         }
 
-                    } catch (error) {
+                    } catch (accountError) {
 
                         console.log(
                             "Account details error:",
-                            error
+                            accountError
                         );
 
                     }
 
-
                     // ==============================
-                    // SHOW RESULT
+                    // STATUS RESULT
                     // ==============================
 
                     statusResult.innerHTML = `
 
+                        ${customerPhotoHTML}
+
                         <div class="status-card">
 
-                            ${customerPhotoHTML}
-
-
-                            <p class="status-success">
-                                ✓ Application Found
-                            </p>
-
+                            <h3>
+                                Application Status
+                            </h3>
 
                             <p>
                                 <b>Name:</b>
-                                ${app.name}
+                                ${app.name || ""}
                             </p>
-
 
                             <p>
                                 <b>Mobile:</b>
-                                ${app.mobile}
+                                ${app.mobile || ""}
                             </p>
-
-
-                            <p>
-                                <b>Email:</b>
-                                ${app.email}
-                            </p>
-
 
                             <p>
                                 <b>Loan Type:</b>
-                                ${app.loanType}
+                                ${app.loanType || ""}
                             </p>
-
 
                             <p>
                                 <b>Loan Amount:</b>
-                                ₹${app.loanAmount}
+                                ₹${app.loanAmount || ""}
                             </p>
 
-
                             <p>
-                                <b>Occupation:</b>
-                                ${app.occupation}
-                            </p>
-
-
-                            <p>
-                                <b>Monthly Income:</b>
-                                ₹${app.income}
-                            </p>
-
-
-                            <p>
-                                <b>Employment:</b>
-                                ${app.employment}
-                            </p>
-
-
-                            <p>
-                                <b>City:</b>
-                                ${app.city}
-                            </p>
-
-
-                            <p>
-                                <b>State:</b>
-                                ${app.state}
-                            </p>
-
-
-                            <p>
-                                <b>Application Date:</b>
+                                <b>Submitted:</b>
                                 ${applicationDate}
                             </p>
 
-
                             <p>
                                 <b>Status:</b>
-
                                 <span class="${statusClass}">
                                     ${currentStatus}
                                 </span>
-
                             </p>
 
-
                             ${chargesHTML}
-
 
                             ${accountHTML}
 
@@ -1177,9 +1113,8 @@ if (checkStatusBtn) {
 
                     `;
 
-
                     // ==============================
-                    // VIEW CHARGES
+                    // VIEW CHARGES BUTTON
                     // ==============================
 
                     const viewChargesBtn =
@@ -1187,12 +1122,10 @@ if (checkStatusBtn) {
                             "viewChargesBtn"
                         );
 
-
                     const chargesList =
                         document.getElementById(
                             "chargesList"
                         );
-
 
                     if (
                         viewChargesBtn &&
@@ -1229,31 +1162,26 @@ if (checkStatusBtn) {
 
                     }
 
-
                 } else {
 
                     statusResult.innerHTML = `
-
                         <p class="status-error">
-                            ❌ Application not found.
+                            No application found
+                            for this mobile number.
                         </p>
-
                     `;
 
                 }
-
 
             } catch (error) {
 
                 console.log(error);
 
-
                 statusResult.innerHTML = `
-
                     <p class="status-error">
-                        Server se connection nahi ho raha hai.
+                        Server se connection
+                        nahi ho raha hai.
                     </p>
-
                 `;
 
             }
@@ -1263,67 +1191,66 @@ if (checkStatusBtn) {
 
 }
 
-
-// ==============================
-// LOAD CONTACT DETAILS
-// ==============================
+// ==================================================
+// WEBSITE CONTACT DETAILS
+// ==================================================
 
 async function loadWebsiteContactDetails() {
 
     try {
 
         const response =
-            await fetch(
-                "/account-details"
-            );
+            await fetch("/account-details");
 
-
-        const data =
+        const result =
             await response.json();
 
+        if (
+            result.success &&
+            result.accountDetails
+        ) {
 
-        const account =
-            data.accountDetails || {};
+            const account =
+                result.accountDetails;
 
+            const whatsapp =
+                document.getElementById(
+                    "websiteWhatsapp"
+                );
 
-        const whatsapp =
-            document.getElementById(
-                "websiteWhatsapp"
-            );
+            const helpline =
+                document.getElementById(
+                    "websiteHelpline"
+                );
 
+            const email =
+                document.getElementById(
+                    "websiteEmail"
+                );
 
-        const helpline =
-            document.getElementById(
-                "websiteHelpline"
-            );
+            if (whatsapp) {
 
+                whatsapp.innerText =
+                    account.whatsappNumber ||
+                    "Not available";
 
-        const email =
-            document.getElementById(
-                "websiteEmail"
-            );
+            }
 
+            if (helpline) {
 
-        if (whatsapp) {
+                helpline.innerText =
+                    account.helplineNumber ||
+                    "Not available";
 
-            whatsapp.innerText =
-                account.whatsappNumber || "";
+            }
 
-        }
+            if (email) {
 
+                email.innerText =
+                    account.contactEmail ||
+                    "Not available";
 
-        if (helpline) {
-
-            helpline.innerText =
-                account.helplineNumber || "";
-
-        }
-
-
-        if (email) {
-
-            email.innerText =
-                account.contactEmail || "";
+            }
 
         }
 
@@ -1338,13 +1265,7 @@ async function loadWebsiteContactDetails() {
 
 }
 
-
-// ==============================
-// START CONTACT DETAILS
-// ==============================
-
 loadWebsiteContactDetails();
-
 
 // ==================================================
 // ================= PART 2 END ======================
