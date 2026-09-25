@@ -5,12 +5,15 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Reliance Finance - Demo Admin Panel</title>
+<title>Reliance Finance - Admin Panel</title>
 
 <style>
+
+* {
+    box-sizing: border-box;
+}
 
 body {
     font-family: Arial, sans-serif;
@@ -23,6 +26,97 @@ h1 {
     color: #1d3557;
 }
 
+/* LOGIN */
+
+#loginScreen {
+    min-height: calc(100vh - 40px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-box {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.12);
+}
+
+.login-box h1 {
+    text-align: center;
+    margin-top: 0;
+}
+
+.login-box p {
+    text-align: center;
+    color: #666;
+}
+
+.login-box label {
+    display: block;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 13px;
+    margin-top: 6px;
+    border: 1px solid #aaa;
+    border-radius: 7px;
+    font-size: 16px;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 13px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 7px;
+    background: #1d3557;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#loginMessage {
+    margin-top: 15px;
+    text-align: center;
+    font-weight: bold;
+    color: #c62828;
+}
+
+/* ADMIN */
+
+#adminPanel {
+    display: none;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.admin-header h1 {
+    margin: 0;
+}
+
+.logout-btn {
+    padding: 10px 18px;
+    background: #c62828;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+/* SEARCH */
+
 #searchBox {
     width: 90%;
     max-width: 550px;
@@ -33,65 +127,9 @@ h1 {
     border-radius: 8px;
 }
 
+/* CONTACT */
 
-/* CONTACT DETAILS */
-
-.contact-box {
-    background: white;
-    padding: 20px;
-    margin-bottom: 25px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.contact-box h2 {
-    color: #1d3557;
-    margin-top: 0;
-}
-
-.contact-note {
-    background: #fff8e1;
-    border: 1px solid #ffe082;
-    padding: 10px;
-    border-radius: 7px;
-    margin-bottom: 15px;
-    font-size: 14px;
-}
-
-.contact-box label {
-    display: block;
-    font-weight: bold;
-    margin-top: 12px;
-}
-
-.contact-box input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 12px;
-    margin-top: 6px;
-    border: 1px solid #aaa;
-    border-radius: 7px;
-    font-size: 15px;
-}
-
-.save-contact-btn {
-    margin-top: 18px;
-    padding: 11px 20px;
-    background: #1d3557;
-    color: white;
-    border: none;
-    border-radius: 7px;
-    cursor: pointer;
-}
-
-.contact-message {
-    margin-top: 12px;
-    font-weight: bold;
-}
-
-
-/* ACCOUNT DETAILS */
-
+.contact-box,
 .account-box {
     background: white;
     padding: 20px;
@@ -100,11 +138,13 @@ h1 {
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+.contact-box h2,
 .account-box h2 {
     color: #1d3557;
     margin-top: 0;
 }
 
+.contact-note,
 .account-note {
     background: #fff8e1;
     border: 1px solid #ffe082;
@@ -114,15 +154,16 @@ h1 {
     font-size: 14px;
 }
 
+.contact-box label,
 .account-box label {
     display: block;
     font-weight: bold;
     margin-top: 12px;
 }
 
+.contact-box input,
 .account-box input {
     width: 100%;
-    box-sizing: border-box;
     padding: 12px;
     margin-top: 6px;
     border: 1px solid #aaa;
@@ -130,6 +171,7 @@ h1 {
     font-size: 15px;
 }
 
+.save-contact-btn,
 .save-account-btn {
     margin-top: 18px;
     padding: 11px 20px;
@@ -140,11 +182,11 @@ h1 {
     cursor: pointer;
 }
 
+.contact-message,
 .account-message {
     margin-top: 12px;
     font-weight: bold;
 }
-
 
 /* APPLICATION */
 
@@ -160,9 +202,6 @@ h1 {
     margin: 8px 0;
 }
 
-
-/* CUSTOMER PHOTO */
-
 .customer-photo {
     width: 100px;
     height: 100px;
@@ -171,7 +210,6 @@ h1 {
     border: 2px solid #ddd;
     margin: 10px 0;
 }
-
 
 /* CHARGES */
 
@@ -252,7 +290,6 @@ h1 {
     cursor: pointer;
 }
 
-
 /* STATUS */
 
 .status-select {
@@ -278,13 +315,17 @@ h1 {
     border-radius: 10px;
 }
 
-
 /* MOBILE */
 
 @media (max-width: 600px) {
 
     body {
         padding: 12px;
+    }
+
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     .charges-title {
@@ -306,190 +347,445 @@ h1 {
 
 <body>
 
+<!-- LOGIN SCREEN -->
 
-<h1>
-    Reliance Finance - Demo Admin Panel
-</h1>
+<div id="loginScreen">
+
+    <div class="login-box">
+
+        <h1>Admin Login</h1>
+
+        <p>Reliance Finance Admin Panel</p>
+
+        <form id="adminLoginForm">
+
+            <label>User ID</label>
+
+            <input
+                type="text"
+                id="adminUserId"
+                placeholder="Enter User ID"
+                autocomplete="username"
+                required
+            >
+
+            <label>Password</label>
+
+            <input
+                type="password"
+                id="adminPassword"
+                placeholder="Enter Password"
+                autocomplete="current-password"
+                required
+            >
+
+            <button
+                type="submit"
+                class="login-btn"
+            >
+                Login
+            </button>
+
+        </form>
+
+        <div id="loginMessage"></div>
+
+    </div>
+
+</div>
 
 
-<!-- CONTACT DETAILS -->
+<!-- ADMIN PANEL -->
 
-<div class="contact-box">
+<div id="adminPanel">
 
-    <h2>
-        Website Contact Details
-    </h2>
+    <div class="admin-header">
 
-    <div class="contact-note">
-        यह learning/demo project है। यहां website के
-        contact details बदल सकते हैं।
+        <h1>Reliance Finance - Admin Panel</h1>
+
+        <button
+            type="button"
+            class="logout-btn"
+            id="logoutBtn"
+        >
+            Logout
+        </button>
+
     </div>
 
 
-    <label>
-        WhatsApp Number
-    </label>
+    <!-- CONTACT DETAILS -->
 
-    <input
-        type="text"
-        id="whatsappNumber"
-        placeholder="Enter WhatsApp number"
-    >
+    <div class="contact-box">
 
+        <h2>Website Contact Details</h2>
 
-    <label>
-        Helpline Number
-    </label>
+        <div class="contact-note">
+            यह learning/demo project है। यहां website के
+            contact details बदल सकते हैं।
+        </div>
 
-    <input
-        type="text"
-        id="helplineNumber"
-        placeholder="Enter helpline number"
-    >
+        <label>WhatsApp Number</label>
 
+        <input
+            type="text"
+            id="whatsappNumber"
+            placeholder="Enter WhatsApp number"
+        >
 
-    <label>
-        Email Address
-    </label>
+        <label>Helpline Number</label>
 
-    <input
-        type="email"
-        id="contactEmail"
-        placeholder="Enter email address"
-    >
+        <input
+            type="text"
+            id="helplineNumber"
+            placeholder="Enter helpline number"
+        >
 
+        <label>Email Address</label>
 
-    <button
-        type="button"
-        class="save-contact-btn"
-        onclick="saveContactDetails()"
-    >
-        Save Contact Details
-    </button>
+        <input
+            type="email"
+            id="contactEmail"
+            placeholder="Enter email address"
+        >
 
+        <button
+            type="button"
+            class="save-contact-btn"
+            onclick="saveContactDetails()"
+        >
+            Save Contact Details
+        </button>
 
-    <div
-        id="contactMessage"
-        class="contact-message"
-    ></div>
+        <div
+            id="contactMessage"
+            class="contact-message"
+        ></div>
 
-</div>
-
-
-<!-- ACCOUNT DETAILS -->
-
-<div class="account-box">
-
-    <h2>
-        Demo Account Details
-    </h2>
-
-    <div class="account-note">
-        यह learning/demo project है। Testing के लिए
-        dummy details का उपयोग करें।
     </div>
 
 
-    <label>
-        Account Holder Name
-    </label>
+    <!-- ACCOUNT DETAILS -->
+
+    <div class="account-box">
+
+        <h2>Demo Account Details</h2>
+
+        <div class="account-note">
+            यह learning/demo project है। Testing के लिए
+            केवल dummy details का उपयोग करें।
+        </div>
+
+        <label>Account Holder Name</label>
+
+        <input
+            type="text"
+            id="accountHolderName"
+            placeholder="Enter demo account holder name"
+        >
+
+        <label>Bank Name</label>
+
+        <input
+            type="text"
+            id="bankName"
+            placeholder="Enter demo bank name"
+        >
+
+        <label>Account Number</label>
+
+        <input
+            type="text"
+            id="accountNumber"
+            placeholder="Enter demo account number"
+        >
+
+        <label>IFSC Code</label>
+
+        <input
+            type="text"
+            id="ifscCode"
+            placeholder="Enter demo IFSC code"
+        >
+
+        <label>UPI ID</label>
+
+        <input
+            type="text"
+            id="upiId"
+            placeholder="Enter demo UPI ID"
+        >
+
+        <button
+            type="button"
+            class="save-account-btn"
+            onclick="saveAccountDetails()"
+        >
+            Save Account Details
+        </button>
+
+        <div
+            id="accountMessage"
+            class="account-message"
+        ></div>
+
+    </div>
+
+
+    <!-- SEARCH -->
 
     <input
         type="text"
-        id="accountHolderName"
-        placeholder="Enter demo account holder name"
+        id="searchBox"
+        placeholder="Search by name or mobile..."
     >
 
 
-    <label>
-        Bank Name
-    </label>
+    <!-- APPLICATIONS -->
 
-    <input
-        type="text"
-        id="bankName"
-        placeholder="Enter demo bank name"
-    >
-
-
-    <label>
-        Account Number
-    </label>
-
-    <input
-        type="text"
-        id="accountNumber"
-        placeholder="Enter demo account number"
-    >
-
-
-    <label>
-        IFSC Code
-    </label>
-
-    <input
-        type="text"
-        id="ifscCode"
-        placeholder="Enter demo IFSC code"
-    >
-
-
-    <label>
-        UPI ID
-    </label>
-
-    <input
-        type="text"
-        id="upiId"
-        placeholder="Enter demo UPI ID"
-    >
-
-
-    <button
-        type="button"
-        class="save-account-btn"
-        onclick="saveAccountDetails()"
-    >
-        Save Account Details
-    </button>
-
-
-    <div
-        id="accountMessage"
-        class="account-message"
-    ></div>
+    <div id="applications">
+        Loading applications...
+    </div>
 
 </div>
 
-
-<!-- SEARCH -->
-
-<input
-    type="text"
-    id="searchBox"
-    placeholder="Search by name or mobile..."
->
-
-
-<!-- APPLICATIONS -->
-
-<div id="applications">
-
-    Loading applications...
-
-</div>
-
-
-<!-- ================================
-     PART 1 END
-================================ -
-<!-- ================================
-     PART 2 START
-================================ -->
 
 <script>
 
 let allApplications = [];
+
+
+/* ================================
+   ADMIN LOGIN
+================================ */
+
+document
+    .getElementById("adminLoginForm")
+    .addEventListener(
+        "submit",
+        async function(e) {
+
+            e.preventDefault();
+
+            const userId =
+                document
+                    .getElementById("adminUserId")
+                    .value
+                    .trim();
+
+            const password =
+                document
+                    .getElementById("adminPassword")
+                    .value;
+
+            const message =
+                document.getElementById(
+                    "loginMessage"
+                );
+
+            message.innerText =
+                "Logging in...";
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/admin-login",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            credentials:
+                                "same-origin",
+
+                            body:
+                                JSON.stringify({
+                                    userId:
+                                        userId,
+
+                                    password:
+                                        password
+                                })
+                        }
+                    );
+
+                const result =
+                    await response.json();
+
+                if (
+                    response.ok &&
+                    result.success
+                ) {
+
+                    document
+                        .getElementById(
+                            "loginScreen"
+                        )
+                        .style.display =
+                            "none";
+
+                    document
+                        .getElementById(
+                            "adminPanel"
+                        )
+                        .style.display =
+                            "block";
+
+                    message.innerText = "";
+
+                    loadAccountDetails();
+                    loadApplications();
+
+                } else {
+
+                    message.innerText =
+                        result.message ||
+                        "Wrong User ID or Password.";
+
+                }
+
+            } catch (error) {
+
+                console.log(error);
+
+                message.innerText =
+                    "Server se connection nahi ho raha hai.";
+
+            }
+
+        }
+    );
+
+
+/* ================================
+   CHECK ADMIN SESSION
+================================ */
+
+async function checkAdminSession() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/admin-session",
+                {
+                    credentials:
+                        "same-origin"
+                }
+            );
+
+        const result =
+            await response.json();
+
+        if (
+            response.ok &&
+            result.success &&
+            result.loggedIn
+        ) {
+
+            document
+                .getElementById(
+                    "loginScreen"
+                )
+                .style.display =
+                    "none";
+
+            document
+                .getElementById(
+                    "adminPanel"
+                )
+                .style.display =
+                    "block";
+
+            loadAccountDetails();
+            loadApplications();
+
+        } else {
+
+            document
+                .getElementById(
+                    "loginScreen"
+                )
+                .style.display =
+                    "flex";
+
+            document
+                .getElementById(
+                    "adminPanel"
+                )
+                .style.display =
+                    "none";
+
+        }
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
+
+}
+
+
+/* ================================
+   LOGOUT
+================================ */
+
+document
+    .getElementById("logoutBtn")
+    .addEventListener(
+        "click",
+        async function() {
+
+            try {
+
+                await fetch(
+                    "/admin-logout",
+                    {
+                        method: "POST",
+                        credentials:
+                            "same-origin"
+                    }
+                );
+
+            } catch (error) {
+
+                console.log(error);
+
+            }
+
+            document
+                .getElementById(
+                    "adminPanel"
+                )
+                .style.display =
+                    "none";
+
+            document
+                .getElementById(
+                    "loginScreen"
+                )
+                .style.display =
+                    "flex";
+
+            document
+                .getElementById(
+                    "adminLoginForm"
+                )
+                .reset();
+
+            document
+                .getElementById(
+                    "loginMessage"
+                )
+                .innerText = "";
+
+        }
+    );
 
 
 /* ================================
@@ -501,51 +797,75 @@ async function saveContactDetails() {
     const contactDetails = {
 
         whatsappNumber:
-            document.getElementById("whatsappNumber").value.trim(),
+            document
+                .getElementById(
+                    "whatsappNumber"
+                )
+                .value
+                .trim(),
 
         helplineNumber:
-            document.getElementById("helplineNumber").value.trim(),
+            document
+                .getElementById(
+                    "helplineNumber"
+                )
+                .value
+                .trim(),
 
         contactEmail:
-            document.getElementById("contactEmail").value.trim()
+            document
+                .getElementById(
+                    "contactEmail"
+                )
+                .value
+                .trim()
 
     };
-
 
     try {
 
         const response =
-            await fetch("/save-account-details", {
+            await fetch(
+                "/save-account-details",
+                {
+                    method: "POST",
 
-                method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    credentials:
+                        "same-origin",
 
-                body: JSON.stringify(contactDetails)
-
-            });
-
+                    body:
+                        JSON.stringify(
+                            contactDetails
+                        )
+                }
+            );
 
         const result =
             await response.json();
 
-
         if (result.success) {
 
-            document.getElementById(
-                "contactMessage"
-            ).innerText =
-                "Contact Details saved successfully!";
+            document
+                .getElementById(
+                    "contactMessage"
+                )
+                .innerText =
+                    "Contact Details saved successfully!";
 
         } else {
 
-            document.getElementById(
-                "contactMessage"
-            ).innerText =
-                result.message ||
-                "Contact details save nahi hui.";
+            document
+                .getElementById(
+                    "contactMessage"
+                )
+                .innerText =
+                    result.message ||
+                    "Contact details save nahi hui.";
 
         }
 
@@ -553,10 +873,12 @@ async function saveContactDetails() {
 
         console.log(error);
 
-        document.getElementById(
-            "contactMessage"
-        ).innerText =
-            "Server se connection nahi ho raha hai.";
+        document
+            .getElementById(
+                "contactMessage"
+            )
+            .innerText =
+                "Server se connection nahi ho raha hai.";
 
     }
 
@@ -572,57 +894,83 @@ async function saveAccountDetails() {
     const accountDetails = {
 
         accountHolderName:
-            document.getElementById("accountHolderName").value.trim(),
+            document
+                .getElementById(
+                    "accountHolderName"
+                )
+                .value
+                .trim(),
 
         bankName:
-            document.getElementById("bankName").value.trim(),
+            document
+                .getElementById("bankName")
+                .value
+                .trim(),
 
         accountNumber:
-            document.getElementById("accountNumber").value.trim(),
+            document
+                .getElementById("accountNumber")
+                .value
+                .trim(),
 
         ifscCode:
-            document.getElementById("ifscCode").value.trim(),
+            document
+                .getElementById("ifscCode")
+                .value
+                .trim(),
 
         upiId:
-            document.getElementById("upiId").value.trim()
+            document
+                .getElementById("upiId")
+                .value
+                .trim()
 
     };
-
 
     try {
 
         const response =
-            await fetch("/save-account-details", {
+            await fetch(
+                "/save-account-details",
+                {
+                    method: "POST",
 
-                method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    credentials:
+                        "same-origin",
 
-                body: JSON.stringify(accountDetails)
-
-            });
-
+                    body:
+                        JSON.stringify(
+                            accountDetails
+                        )
+                }
+            );
 
         const result =
             await response.json();
 
-
         if (result.success) {
 
-            document.getElementById(
-                "accountMessage"
-            ).innerText =
-                "Demo Account Details saved successfully!";
+            document
+                .getElementById(
+                    "accountMessage"
+                )
+                .innerText =
+                    "Demo Account Details saved successfully!";
 
         } else {
 
-            document.getElementById(
-                "accountMessage"
-            ).innerText =
-                result.message ||
-                "Account details save nahi hui.";
+            document
+                .getElementById(
+                    "accountMessage"
+                )
+                .innerText =
+                    result.message ||
+                    "Account details save nahi hui.";
 
         }
 
@@ -630,10 +978,12 @@ async function saveAccountDetails() {
 
         console.log(error);
 
-        document.getElementById(
-            "accountMessage"
-        ).innerText =
-            "Server se connection nahi ho raha hai.";
+        document
+            .getElementById(
+                "accountMessage"
+            )
+            .innerText =
+                "Server se connection nahi ho raha hai.";
 
     }
 
@@ -649,12 +999,12 @@ async function loadAccountDetails() {
     try {
 
         const response =
-            await fetch("/account-details");
-
+            await fetch(
+                "/account-details"
+            );
 
         const result =
             await response.json();
-
 
         if (
             result.success &&
@@ -664,53 +1014,55 @@ async function loadAccountDetails() {
             const account =
                 result.accountDetails;
 
+            document
+                .getElementById(
+                    "accountHolderName"
+                )
+                .value =
+                    account.accountHolderName || "";
 
-            document.getElementById(
-                "accountHolderName"
-            ).value =
-                account.accountHolderName || "";
+            document
+                .getElementById("bankName")
+                .value =
+                    account.bankName || "";
 
+            document
+                .getElementById(
+                    "accountNumber"
+                )
+                .value =
+                    account.accountNumber || "";
 
-            document.getElementById(
-                "bankName"
-            ).value =
-                account.bankName || "";
+            document
+                .getElementById("ifscCode")
+                .value =
+                    account.ifscCode || "";
 
+            document
+                .getElementById("upiId")
+                .value =
+                    account.upiId || "";
 
-            document.getElementById(
-                "accountNumber"
-            ).value =
-                account.accountNumber || "";
+            document
+                .getElementById(
+                    "whatsappNumber"
+                )
+                .value =
+                    account.whatsappNumber || "";
 
+            document
+                .getElementById(
+                    "helplineNumber"
+                )
+                .value =
+                    account.helplineNumber || "";
 
-            document.getElementById(
-                "ifscCode"
-            ).value =
-                account.ifscCode || "";
-
-
-            document.getElementById(
-                "upiId"
-            ).value =
-                account.upiId || "";
-
-
-            document.getElementById(
-                "whatsappNumber"
-            ).value =
-                account.whatsappNumber || "";
-
-
-            document.getElementById(
-                "helplineNumber"
-            ).value =
-                account.helplineNumber || "";
-
-
-            document.getElementById(
-                "contactEmail"
-            ).value =
-                account.contactEmail || "";
+            document
+                .getElementById(
+                    "contactEmail"
+                )
+                .value =
+                    account.contactEmail || "";
 
         }
 
@@ -732,27 +1084,59 @@ async function loadApplications() {
     try {
 
         const response =
-            await fetch("/applications");
+            await fetch(
+                "/applications",
+                {
+                    credentials:
+                        "same-origin"
+                }
+            );
 
+        if (!response.ok) {
+
+            if (response.status === 401) {
+
+                document
+                    .getElementById(
+                        "adminPanel"
+                    )
+                    .style.display =
+                        "none";
+
+                document
+                    .getElementById(
+                        "loginScreen"
+                    )
+                    .style.display =
+                        "flex";
+
+                return;
+
+            }
+
+            throw new Error(
+                "Applications load failed"
+            );
+
+        }
 
         allApplications =
             await response.json();
-
 
         displayApplications(
             allApplications
         );
 
-
     } catch (error) {
 
         console.log(error);
 
-
-        document.getElementById(
-            "applications"
-        ).innerHTML =
-            "Server se connection nahi ho raha hai.";
+        document
+            .getElementById(
+                "applications"
+            )
+            .innerHTML =
+                "Server se connection nahi ho raha hai.";
 
     }
 
@@ -763,13 +1147,18 @@ async function loadApplications() {
    DISPLAY APPLICATIONS
 ================================ */
 
-function displayApplications(applications) {
+function displayApplications(
+    applications
+) {
 
     const container =
-        document.getElementById("applications");
+        document.getElementById(
+            "applications"
+        );
 
-
-    if (applications.length === 0) {
+    if (
+        applications.length === 0
+    ) {
 
         container.innerHTML = `
             <div class="no-data">
@@ -781,9 +1170,7 @@ function displayApplications(applications) {
 
     }
 
-
     container.innerHTML = "";
-
 
     applications.forEach(
         function(app, index) {
@@ -791,9 +1178,7 @@ function displayApplications(applications) {
             const currentStatus =
                 app.status || "Pending";
 
-
             let photoHTML = "";
-
 
             if (app.customerPhoto) {
 
@@ -809,7 +1194,6 @@ function displayApplications(applications) {
                 `;
 
             }
-
 
             container.innerHTML += `
 
@@ -886,7 +1270,6 @@ function displayApplications(applications) {
                     ${currentStatus}
                 </p>
 
-
                 <select
                     class="status-select"
                     id="status-${index}"
@@ -894,27 +1277,38 @@ function displayApplications(applications) {
 
                     <option
                         value="Pending"
-                        ${currentStatus === "Pending" ? "selected" : ""}
+                        ${
+                            currentStatus === "Pending"
+                            ? "selected"
+                            : ""
+                        }
                     >
                         Pending
                     </option>
 
                     <option
                         value="Approved"
-                        ${currentStatus === "Approved" ? "selected" : ""}
+                        ${
+                            currentStatus === "Approved"
+                            ? "selected"
+                            : ""
+                        }
                     >
                         Approved
                     </option>
 
                     <option
                         value="Rejected"
-                        ${currentStatus === "Rejected" ? "selected" : ""}
+                        ${
+                            currentStatus === "Rejected"
+                            ? "selected"
+                            : ""
+                        }
                     >
                         Rejected
                     </option>
 
                 </select>
-
 
                 <button
                     class="save-btn"
@@ -922,9 +1316,6 @@ function displayApplications(applications) {
                 >
                     Save Status
                 </button>
-
-
-                <!-- DEMO CHARGES -->
 
                 <div class="charges-box">
 
@@ -943,7 +1334,6 @@ function displayApplications(applications) {
                         </button>
 
                     </div>
-
 
                     <div
                         class="charges-options"
@@ -999,7 +1389,6 @@ function displayApplications(applications) {
                             index
                         )}
 
-
                         <button
                             type="button"
                             class="save-charges-btn"
@@ -1021,7 +1410,7 @@ function displayApplications(applications) {
 
 }
 
-
+<!-- PART 1 END -->
 /* ================================
    CHARGE ITEM
 ================================ */
@@ -1039,7 +1428,6 @@ function chargeItem(
     const display =
         value ? "block" : "none";
 
-
     return `
 
         <div class="charge-item">
@@ -1056,7 +1444,6 @@ function chargeItem(
                 ${title}
 
             </label>
-
 
             <div
                 class="amount-box"
@@ -1086,22 +1473,18 @@ function chargeItem(
 
 function toggleCharges(index) {
 
-    const boxId =
-        "charges-options-" + index;
-
-
     const box =
-        document.getElementById(boxId);
-
+        document.getElementById(
+            "charges-options-" + index
+        );
 
     if (!box) {
-
         return;
-
     }
 
-
-    if (box.style.display === "block") {
+    if (
+        box.style.display === "block"
+    ) {
 
         box.style.display = "none";
 
@@ -1123,50 +1506,45 @@ function toggleAmount(
     index
 ) {
 
-    const checkboxId =
-        "select-" + name + "-" + index;
-
-
-    const amountBoxId =
-        "amount-" + name + "-" + index;
-
-
-    const inputId =
-        name + "-" + index;
-
-
     const checkbox =
-        document.getElementById(checkboxId);
-
+        document.getElementById(
+            "select-" +
+            name +
+            "-" +
+            index
+        );
 
     const box =
-        document.getElementById(amountBoxId);
-
+        document.getElementById(
+            "amount-" +
+            name +
+            "-" +
+            index
+        );
 
     const input =
-        document.getElementById(inputId);
-
+        document.getElementById(
+            name +
+            "-" +
+            index
+        );
 
     if (!checkbox || !box) {
-
         return;
-
     }
-
 
     if (checkbox.checked) {
 
-        box.style.display = "block";
+        box.style.display =
+            "block";
 
     } else {
 
-        box.style.display = "none";
-
+        box.style.display =
+            "none";
 
         if (input) {
-
             input.value = "";
-
         }
 
     }
@@ -1183,56 +1561,55 @@ async function updateStatus(index) {
     const app =
         allApplications[index];
 
-
     const statusElement =
         document.getElementById(
             "status-" + index
         );
 
-
     if (!statusElement) {
-
         return;
-
     }
-
 
     const status =
         statusElement.value;
 
-
     try {
 
         const response =
-            await fetch("/update-status", {
+            await fetch(
+                "/update-status",
+                {
+                    method: "POST",
 
-                method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    credentials:
+                        "same-origin",
 
-                body: JSON.stringify({
+                    body:
+                        JSON.stringify({
 
-                    mobile: app.mobile,
+                            mobile:
+                                app.mobile,
 
-                    status: status
+                            status:
+                                status
 
-                })
-
-            });
-
+                        })
+                }
+            );
 
         const result =
             await response.json();
-
 
         if (result.success) {
 
             alert(
                 "Status updated successfully."
             );
-
 
             loadApplications();
 
@@ -1248,7 +1625,6 @@ async function updateStatus(index) {
     } catch (error) {
 
         console.log(error);
-
 
         alert(
             "Server se connection nahi ho raha hai."
@@ -1267,7 +1643,6 @@ async function saveCharges(index) {
 
     const app =
         allApplications[index];
-
 
     const charges = {
 
@@ -1315,39 +1690,42 @@ async function saveCharges(index) {
 
     };
 
-
     try {
 
         const response =
-            await fetch("/update-charges", {
+            await fetch(
+                "/update-charges",
+                {
+                    method: "POST",
 
-                method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    credentials:
+                        "same-origin",
 
-                body: JSON.stringify({
+                    body:
+                        JSON.stringify({
 
-                    mobile: app.mobile,
+                            mobile:
+                                app.mobile,
 
-                    ...charges
+                            ...charges
 
-                })
-
-            });
-
+                        })
+                }
+            );
 
         const result =
             await response.json();
-
 
         if (result.success) {
 
             alert(
                 "Demo charges updated successfully."
             );
-
 
             loadApplications();
 
@@ -1363,7 +1741,6 @@ async function saveCharges(index) {
     } catch (error) {
 
         console.log(error);
-
 
         alert(
             "Server se connection nahi ho raha hai."
@@ -1383,42 +1760,31 @@ function getChargeValue(
     index
 ) {
 
-    const checkboxId =
-        "select-" + name + "-" + index;
-
-
-    const inputId =
-        name + "-" + index;
-
-
     const checkbox =
         document.getElementById(
-            checkboxId
+            "select-" +
+            name +
+            "-" +
+            index
         );
-
 
     const input =
         document.getElementById(
-            inputId
+            name +
+            "-" +
+            index
         );
-
 
     if (
         !checkbox ||
         !checkbox.checked
     ) {
-
         return 0;
-
     }
-
 
     if (!input) {
-
         return 0;
-
     }
-
 
     return Number(
         input.value || 0
@@ -1442,7 +1808,6 @@ document
                     .toLowerCase()
                     .trim();
 
-
             const filtered =
                 allApplications.filter(
                     function(app) {
@@ -1463,7 +1828,6 @@ document
                     }
                 );
 
-
             displayApplications(
                 filtered
             );
@@ -1473,19 +1837,13 @@ document
 
 
 /* ================================
-   START
+   START ADMIN SESSION CHECK
 ================================ */
 
-loadAccountDetails();
-
-loadApplications();
+checkAdminSession();
 
 </script>
 
 </body>
 
 </html>
-
-<!-- ================================
-     PART 2 END
-================================ -->

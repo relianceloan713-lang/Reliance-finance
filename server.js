@@ -1,14 +1,182 @@
+// ==================================================
+// PART 1 START
+// RELIANCE FINANCE SERVER
+// ==================================================
+
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const { Pool } = require("pg");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
+
+
+// ==================================================
+// ADMIN LOGIN SECURITY
+// ==================================================
+
+const ADMIN_USER_ID =
+    process.env.ADMIN_USER_ID || "admin";
+
+const ADMIN_PASSWORD =
+    process.env.ADMIN_PASSWORD || "admin123";
+
+const ADMIN_SECRET_KEY =
+    process.env.ADMIN_SECRET_KEY ||
+    "change-this-secret-key";
+
+
+// CREATE ADMIN TOKEN
+
+function createAdminToken() {
+
+    const time =
+        Date.now().toString();
+
+    const data =
+        "admin:" + time;
+
+    const signature =
+        crypto
+            .createHmac(
+                "sha256",
+                ADMIN_SECRET_KEY
+            )
+            .update(data)
+            .digest("hex");
+
+    return data + ":" + signature;
+}
+
+
+// VERIFY ADMIN TOKEN
+
+function verifyAdminToken(token) {
+
+    if (!token) {
+        return false;
+    }
+
+    const parts =
+        token.split(":");
+
+    if (parts.length !== 3) {
+        return false;
+    }
+
+    const user =
+        parts[0];
+
+    const time =
+        parts[1];
+
+    const signature =
+        parts[2];
+
+    if (user !== "admin") {
+        return false;
+    }
+
+    const data =
+        user + ":" + time;
+
+    const expectedSignature =
+        crypto
+            .createHmac(
+                "sha256",
+                ADMIN_SECRET_KEY
+            )
+            .update(data)
+            .digest("hex");
+
+    if (signature !== expectedSignature) {
+        return false;
+    }
+
+    const tokenAge =
+        Date.now() -
+        Number(time);
+
+    if (
+        !Number.isFinite(tokenAge) ||
+        tokenAge < 0 ||
+        tokenAge > 24 * 60 * 60 * 1000
+    ) {
+        return false;
+    }
+
+    return true;
+}
+
+
+// GET ADMIN TOKEN FROM COOKIE
+
+function getAdminToken(req) {
+
+    const cookieHeader =
+        req.headers.cookie || "";
+
+    const cookies =
+        cookieHeader
+            .split(";")
+            .map(function (item) {
+                return item.trim();
+            });
+
+    const adminCookie =
+        cookies.find(function (cookie) {
+
+            return cookie.startsWith(
+                "admin_token="
+            );
+
+        });
+
+    if (!adminCookie) {
+        return "";
+    }
+
+    return decodeURIComponent(
+        adminCookie.substring(
+            "admin_token=".length
+        )
+    );
+}
+
+
+// ADMIN AUTHENTICATION
+
+function requireAdmin(
+    req,
+    res,
+    next
+) {
+
+    const token =
+        getAdminToken(req);
+
+    if (!verifyAdminToken(token)) {
+
+        return res.status(401).json({
+
+            success: false,
+
+            message:
+                "Admin login required."
+
+        });
+
+    }
+
+    next();
+}
 
 
 // ==================================================
@@ -16,11 +184,17 @@ app.use(express.static(__dirname));
 // ==================================================
 
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
 
-    ssl: process.env.DATABASE_URL
-        ? { rejectUnauthorized: false }
-        : false
+    connectionString:
+        process.env.DATABASE_URL,
+
+    ssl:
+        process.env.DATABASE_URL
+            ? {
+                rejectUnauthorized: false
+            }
+            : false
+
 });
 
 
@@ -64,7 +238,9 @@ async function setupDatabase() {
         await migrateOldAccount();
 
 
-        console.log("PostgreSQL database ready");
+        console.log(
+            "PostgreSQL database ready"
+        );
 
     } catch (error) {
 
@@ -74,6 +250,7 @@ async function setupDatabase() {
         );
 
     }
+
 }
 
 
@@ -86,7 +263,10 @@ async function migrateOldApplications() {
     try {
 
         const file =
-            path.join(__dirname, "applications.json");
+            path.join(
+                __dirname,
+                "applications.json"
+            );
 
 
         if (!fs.existsSync(file)) {
@@ -101,7 +281,9 @@ async function migrateOldApplications() {
 
 
         const count =
-            Number(result.rows[0].count);
+            Number(
+                result.rows[0].count
+            );
 
 
         if (count > 0) {
@@ -130,7 +312,10 @@ async function migrateOldApplications() {
         }
 
 
-        for (const application of applications) {
+        for (
+            const application
+            of applications
+        ) {
 
             await pool.query(
                 `
@@ -151,7 +336,6 @@ async function migrateOldApplications() {
             applications.length +
             " old applications migrated"
         );
-
 
     } catch (error) {
 
@@ -192,7 +376,9 @@ async function migrateOldAccount() {
 
 
         const count =
-            Number(result.rows[0].count);
+            Number(
+                result.rows[0].count
+            );
 
 
         if (count > 0) {
@@ -230,7 +416,6 @@ async function migrateOldAccount() {
             "Old demo account migrated"
         );
 
-
     } catch (error) {
 
         console.log(
@@ -247,20 +432,158 @@ async function migrateOldAccount() {
 // HOME
 // ==================================================
 
-app.get("/", function (req, res) {
+app.get(
+    "/",
+    function (req, res) {
 
-    res.sendFile(
-        path.join(
-            __dirname,
-            "index.html"
-        )
-    );
+        res.sendFile(
+            path.join(
+                __dirname,
+                "index.html"
+            )
+        );
 
-});
+    }
+);
+
+
+// ==================================================
+// ADMIN LOGIN API
+// ==================================================
+
+app.post(
+    "/admin-login",
+    function (req, res) {
+
+        const userId =
+            String(
+                req.body.userId || ""
+            ).trim();
+
+        const password =
+            String(
+                req.body.password || ""
+            );
+
+
+        if (
+            userId !== ADMIN_USER_ID ||
+            password !== ADMIN_PASSWORD
+        ) {
+
+            return res.status(401).json({
+
+                success: false,
+
+                message:
+                    "Wrong User ID or Password."
+
+            });
+
+        }
+
+
+        const token =
+            createAdminToken();
+
+
+        res.setHeader(
+            "Set-Cookie",
+            "admin_token=" +
+            encodeURIComponent(token) +
+            "; HttpOnly; SameSite=Lax; Path=/; Max-Age=86400"
+        );
+
+
+        res.json({
+
+            success: true,
+
+            message:
+                "Admin login successful."
+
+        });
+
+    }
+);
+
+
+// ==================================================
+// ADMIN LOGOUT API
+// ==================================================
+
+app.post(
+    "/admin-logout",
+    function (req, res) {
+
+        res.setHeader(
+            "Set-Cookie",
+            "admin_token=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0"
+        );
+
+
+        res.json({
+
+            success: true,
+
+            message:
+                "Admin logout successful."
+
+        });
+
+    }
+);
+
+
+// ==================================================
+// CHECK ADMIN LOGIN
+// ==================================================
+
+app.get(
+    "/admin-session",
+    function (req, res) {
+
+        const token =
+            getAdminToken(req);
+
+
+        if (
+            verifyAdminToken(token)
+        ) {
+
+            return res.json({
+
+                success: true,
+                loggedIn: true
+
+            });
+
+        }
+
+
+        res.status(401).json({
+
+            success: false,
+            loggedIn: false
+
+        });
+
+    }
+);
+
+
+// ==================================================
+// PART 1 END
+// ==================================================
+// ==================================================
+// PART 2 START
+// ADMIN + APPLICATION ROUTES
+// ==================================================
 
 
 // ==================================================
 // SAVE APPLICATION
+// PUBLIC
 // ==================================================
 
 app.post(
@@ -269,9 +592,7 @@ app.post(
 
         try {
 
-            const application =
-                req.body;
-
+            const application = req.body;
 
             if (process.env.DATABASE_URL) {
 
@@ -287,7 +608,6 @@ app.post(
                     ]
                 );
 
-
             } else {
 
                 const file =
@@ -296,9 +616,7 @@ app.post(
                         "applications.json"
                     );
 
-
                 let applications = [];
-
 
                 if (fs.existsSync(file)) {
 
@@ -308,21 +626,13 @@ app.post(
                             "utf8"
                         );
 
-
                     if (data.trim() !== "") {
-
                         applications =
                             JSON.parse(data);
-
                     }
-
                 }
 
-
-                applications.push(
-                    application
-                );
-
+                applications.push(application);
 
                 fs.writeFileSync(
                     file,
@@ -332,122 +642,22 @@ app.post(
                         2
                     )
                 );
-
             }
-
 
             res.json({
-
                 success: true,
-
                 message:
                     "Application saved successfully"
-
             });
-
 
         } catch (error) {
 
             console.log(error);
 
-
             res.status(500).json({
-
                 success: false,
-
                 message:
                     "Application save nahi hui"
-
-            });
-
-        }
-
-    }
-);
-
-
-// ==================================================
-// GET APPLICATIONS
-// ==================================================
-
-app.get(
-    "/applications",
-    async function (req, res) {
-
-        try {
-
-            if (process.env.DATABASE_URL) {
-
-                const result =
-                    await pool.query(
-                        `
-                        SELECT data
-                        FROM applications
-                        ORDER BY id DESC
-                        `
-                    );
-
-
-                const applications =
-                    result.rows.map(
-                        function (row) {
-                            return row.data;
-                        }
-                    );
-
-
-                return res.json(
-                    applications
-                );
-
-            }
-
-
-            const file =
-                path.join(
-                    __dirname,
-                    "applications.json"
-                );
-
-
-            if (!fs.existsSync(file)) {
-                return res.json([]);
-            }
-
-
-            const data =
-                fs.readFileSync(
-                    file,
-                    "utf8"
-                );
-
-
-            if (data.trim() === "") {
-                return res.json([]);
-            }
-
-
-            const applications =
-                JSON.parse(data);
-
-
-            res.json(
-                applications
-            );
-
-
-        } catch (error) {
-
-            console.log(error);
-
-
-            res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Applications load nahi hui"
-
             });
 
         }
@@ -458,6 +668,7 @@ app.get(
 
 // ==================================================
 // CHECK APPLICATION
+// PUBLIC
 // ==================================================
 
 app.get(
@@ -468,7 +679,6 @@ app.get(
 
             const mobile =
                 req.query.mobile;
-
 
             if (process.env.DATABASE_URL) {
 
@@ -484,10 +694,7 @@ app.get(
                         [mobile]
                     );
 
-
-                if (
-                    result.rows.length === 0
-                ) {
+                if (result.rows.length === 0) {
 
                     return res.json({
                         success: false
@@ -495,16 +702,11 @@ app.get(
 
                 }
 
-
                 return res.json({
-
                     success: true,
-
                     application:
                         result.rows[0].data
-
                 });
-
             }
 
 
@@ -514,7 +716,6 @@ app.get(
                     "applications.json"
                 );
 
-
             if (!fs.existsSync(file)) {
 
                 return res.json({
@@ -523,13 +724,11 @@ app.get(
 
             }
 
-
             const data =
                 fs.readFileSync(
                     file,
                     "utf8"
                 );
-
 
             if (data.trim() === "") {
 
@@ -539,52 +738,35 @@ app.get(
 
             }
 
-
             const applications =
                 JSON.parse(data);
-
 
             const application =
                 applications.find(
                     function (app) {
-
                         return app.mobile === mobile;
-
                     }
                 );
 
+            if (!application) {
 
-            if (application) {
-
-                res.json({
-
-                    success: true,
-
-                    application:
-                        application
-
-                });
-
-            } else {
-
-                res.json({
-
+                return res.json({
                     success: false
-
                 });
 
             }
 
+            res.json({
+                success: true,
+                application: application
+            });
 
         } catch (error) {
 
             console.log(error);
 
-
             res.status(500).json({
-
                 success: false
-
             });
 
         }
@@ -594,15 +776,86 @@ app.get(
 
 
 // ==================================================
-// PART 1 END
-// PART 2 START FROM HERE
+// GET APPLICATIONS
+// ADMIN ONLY
 // ==================================================
+
+app.get(
+    "/applications",
+    requireAdmin,
+    async function (req, res) {
+
+        try {
+
+            if (process.env.DATABASE_URL) {
+
+                const result =
+                    await pool.query(
+                        `
+                        SELECT data
+                        FROM applications
+                        ORDER BY id DESC
+                        `
+                    );
+
+                return res.json(
+                    result.rows.map(
+                        function (row) {
+                            return row.data;
+                        }
+                    )
+                );
+            }
+
+
+            const file =
+                path.join(
+                    __dirname,
+                    "applications.json"
+                );
+
+            if (!fs.existsSync(file)) {
+                return res.json([]);
+            }
+
+            const data =
+                fs.readFileSync(
+                    file,
+                    "utf8"
+                );
+
+            if (data.trim() === "") {
+                return res.json([]);
+            }
+
+            res.json(
+                JSON.parse(data)
+            );
+
+        } catch (error) {
+
+            console.log(error);
+
+            res.status(500).json({
+                success: false,
+                message:
+                    "Applications load nahi hui"
+            });
+
+        }
+
+    }
+);
+
+
 // ==================================================
-// UPDATE APPLICATION STATUS
+// UPDATE STATUS
+// ADMIN ONLY
 // ==================================================
 
 app.post(
     "/update-status",
+    requireAdmin,
     async function (req, res) {
 
         try {
@@ -628,28 +881,21 @@ app.post(
                         [mobile]
                     );
 
-
                 if (result.rows.length === 0) {
 
                     return res.status(404).json({
-
                         success: false,
-
                         message:
                             "Application nahi mili"
-
                     });
 
                 }
 
-
                 const application =
                     result.rows[0].data;
 
-
                 application.status =
                     status;
-
 
                 await pool.query(
                     `
@@ -663,16 +909,11 @@ app.post(
                     ]
                 );
 
-
                 return res.json({
-
                     success: true,
-
                     message:
                         "Status updated successfully"
-
                 });
-
             }
 
 
@@ -682,20 +923,15 @@ app.post(
                     "applications.json"
                 );
 
-
             if (!fs.existsSync(file)) {
 
                 return res.status(404).json({
-
                     success: false,
-
                     message:
                         "Applications file nahi mili"
-
                 });
 
             }
-
 
             const data =
                 fs.readFileSync(
@@ -703,45 +939,32 @@ app.post(
                     "utf8"
                 );
 
-
             let applications = [];
 
-
             if (data.trim() !== "") {
-
                 applications =
                     JSON.parse(data);
-
             }
-
 
             const index =
                 applications.findIndex(
                     function (app) {
-
                         return app.mobile === mobile;
-
                     }
                 );
-
 
             if (index === -1) {
 
                 return res.status(404).json({
-
                     success: false,
-
                     message:
                         "Application nahi mili"
-
                 });
 
             }
 
-
             applications[index].status =
                 status;
-
 
             fs.writeFileSync(
                 file,
@@ -752,29 +975,20 @@ app.post(
                 )
             );
 
-
             res.json({
-
                 success: true,
-
                 message:
                     "Status updated successfully"
-
             });
-
 
         } catch (error) {
 
             console.log(error);
 
-
             res.status(500).json({
-
                 success: false,
-
                 message:
                     "Status update nahi hua"
-
             });
 
         }
@@ -785,10 +999,12 @@ app.post(
 
 // ==================================================
 // UPDATE DEMO CHARGES
+// ADMIN ONLY
 // ==================================================
 
 app.post(
     "/update-charges",
+    requireAdmin,
     async function (req, res) {
 
         try {
@@ -797,7 +1013,8 @@ app.post(
                 req.body.mobile;
 
             const charges =
-                req.body.charges || req.body;
+                req.body.charges ||
+                req.body;
 
 
             if (process.env.DATABASE_URL) {
@@ -814,20 +1031,15 @@ app.post(
                         [mobile]
                     );
 
-
                 if (result.rows.length === 0) {
 
                     return res.status(404).json({
-
                         success: false,
-
                         message:
                             "Application nahi mili"
-
                     });
 
                 }
-
 
                 const application =
                     result.rows[0].data;
@@ -878,12 +1090,9 @@ app.post(
 
 
                 return res.json({
-
                     success: true,
-
                     message:
                         "Charges updated successfully"
-
                 });
 
             }
@@ -895,20 +1104,15 @@ app.post(
                     "applications.json"
                 );
 
-
             if (!fs.existsSync(file)) {
 
                 return res.status(404).json({
-
                     success: false,
-
                     message:
                         "Applications file nahi mili"
-
                 });
 
             }
-
 
             const data =
                 fs.readFileSync(
@@ -916,37 +1120,26 @@ app.post(
                     "utf8"
                 );
 
-
             let applications = [];
 
-
             if (data.trim() !== "") {
-
                 applications =
                     JSON.parse(data);
-
             }
-
 
             const index =
                 applications.findIndex(
                     function (app) {
-
                         return app.mobile === mobile;
-
                     }
                 );
-
 
             if (index === -1) {
 
                 return res.status(404).json({
-
                     success: false,
-
                     message:
                         "Application nahi mili"
-
                 });
 
             }
@@ -994,27 +1187,19 @@ app.post(
 
 
             res.json({
-
                 success: true,
-
                 message:
                     "Charges updated successfully"
-
             });
-
 
         } catch (error) {
 
             console.log(error);
 
-
             res.status(500).json({
-
                 success: false,
-
                 message:
                     "Charges update nahi hua"
-
             });
 
         }
@@ -1024,19 +1209,19 @@ app.post(
 
 
 // ==================================================
-// SAVE DEMO ACCOUNT + CONTACT DETAILS
+// SAVE ACCOUNT + CONTACT DETAILS
+// ADMIN ONLY
 // ==================================================
 
 app.post(
     "/save-account-details",
+    requireAdmin,
     async function (req, res) {
 
         try {
 
             let accountDetails = {};
 
-
-            // LOAD OLD DETAILS
 
             if (process.env.DATABASE_URL) {
 
@@ -1050,11 +1235,11 @@ app.post(
                         `
                     );
 
-
                 if (oldResult.rows.length > 0) {
 
                     accountDetails =
-                        oldResult.rows[0].account_details || {};
+                        oldResult.rows[0]
+                            .account_details || {};
 
                 }
 
@@ -1066,7 +1251,6 @@ app.post(
                         "demo-account.json"
                     );
 
-
                 if (fs.existsSync(file)) {
 
                     const data =
@@ -1074,7 +1258,6 @@ app.post(
                             file,
                             "utf8"
                         );
-
 
                     if (data.trim() !== "") {
 
@@ -1088,10 +1271,9 @@ app.post(
             }
 
 
-            // ACCOUNT DETAILS
-
             if (
-                req.body.accountHolderName !== undefined
+                req.body.accountHolderName !==
+                undefined
             ) {
 
                 accountDetails.accountHolderName =
@@ -1099,9 +1281,9 @@ app.post(
 
             }
 
-
             if (
-                req.body.bankName !== undefined
+                req.body.bankName !==
+                undefined
             ) {
 
                 accountDetails.bankName =
@@ -1109,9 +1291,9 @@ app.post(
 
             }
 
-
             if (
-                req.body.accountNumber !== undefined
+                req.body.accountNumber !==
+                undefined
             ) {
 
                 accountDetails.accountNumber =
@@ -1119,9 +1301,9 @@ app.post(
 
             }
 
-
             if (
-                req.body.ifscCode !== undefined
+                req.body.ifscCode !==
+                undefined
             ) {
 
                 accountDetails.ifscCode =
@@ -1129,9 +1311,9 @@ app.post(
 
             }
 
-
             if (
-                req.body.upiId !== undefined
+                req.body.upiId !==
+                undefined
             ) {
 
                 accountDetails.upiId =
@@ -1139,11 +1321,9 @@ app.post(
 
             }
 
-
-            // CONTACT DETAILS
-
             if (
-                req.body.whatsappNumber !== undefined
+                req.body.whatsappNumber !==
+                undefined
             ) {
 
                 accountDetails.whatsappNumber =
@@ -1151,9 +1331,9 @@ app.post(
 
             }
 
-
             if (
-                req.body.helplineNumber !== undefined
+                req.body.helplineNumber !==
+                undefined
             ) {
 
                 accountDetails.helplineNumber =
@@ -1161,9 +1341,9 @@ app.post(
 
             }
 
-
             if (
-                req.body.contactEmail !== undefined
+                req.body.contactEmail !==
+                undefined
             ) {
 
                 accountDetails.contactEmail =
@@ -1171,8 +1351,6 @@ app.post(
 
             }
 
-
-            // SAVE TO POSTGRESQL
 
             if (process.env.DATABASE_URL) {
 
@@ -1183,32 +1361,26 @@ app.post(
                     VALUES (1, $1)
                     ON CONFLICT (id)
                     DO UPDATE SET
-                    account_details = EXCLUDED.account_details
+                    account_details =
+                    EXCLUDED.account_details
                     `,
                     [accountDetails]
                 );
 
-
                 return res.json({
-
                     success: true,
-
                     message:
                         "Details saved successfully"
-
                 });
 
             }
 
-
-            // LOCAL JSON FALLBACK
 
             const file =
                 path.join(
                     __dirname,
                     "demo-account.json"
                 );
-
 
             fs.writeFileSync(
                 file,
@@ -1219,16 +1391,11 @@ app.post(
                 )
             );
 
-
             res.json({
-
                 success: true,
-
                 message:
                     "Details saved successfully"
-
             });
-
 
         } catch (error) {
 
@@ -1237,14 +1404,10 @@ app.post(
                 error
             );
 
-
             res.status(500).json({
-
                 success: false,
-
                 message:
                     "Details save nahi hui"
-
             });
 
         }
@@ -1254,7 +1417,8 @@ app.post(
 
 
 // ==================================================
-// GET DEMO ACCOUNT + CONTACT DETAILS
+// GET ACCOUNT + CONTACT DETAILS
+// PUBLIC
 // ==================================================
 
 app.get(
@@ -1275,33 +1439,24 @@ app.get(
                         `
                     );
 
-
                 if (result.rows.length === 0) {
 
                     return res.json({
-
                         success: true,
-
                         accountDetails: {}
-
                     });
 
                 }
 
-
                 return res.json({
-
                     success: true,
-
                     accountDetails:
-                        result.rows[0].account_details
-
+                        result.rows[0]
+                            .account_details
                 });
 
             }
 
-
-            // LOCAL JSON FALLBACK
 
             const file =
                 path.join(
@@ -1309,19 +1464,14 @@ app.get(
                     "demo-account.json"
                 );
 
-
             if (!fs.existsSync(file)) {
 
                 return res.json({
-
                     success: true,
-
                     accountDetails: {}
-
                 });
 
             }
-
 
             const data =
                 fs.readFileSync(
@@ -1329,35 +1479,25 @@ app.get(
                     "utf8"
                 );
 
-
             const accountDetails =
                 data.trim() === ""
                     ? {}
                     : JSON.parse(data);
 
-
             res.json({
-
                 success: true,
-
                 accountDetails:
                     accountDetails
-
             });
-
 
         } catch (error) {
 
             console.log(error);
 
-
             res.status(500).json({
-
                 success: false,
-
                 message:
                     "Account details load nahi hui"
-
             });
 
         }
@@ -1399,3 +1539,8 @@ setupDatabase()
         );
 
     });
+
+
+// ==================================================
+// PART 2 END
+// ==================================================
