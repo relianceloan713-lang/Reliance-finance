@@ -313,10 +313,10 @@ app.post("/admin-login", (req, res) => {
 
   const token = makeAdminToken();
 
-  res.setHeader(
-    "Set-Cookie",
-    admin_token=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=28800
-  );
+res.setHeader(
+  "Set-Cookie",
+  admin_token=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=28800
+);
 
   res.json({
     success: true,
