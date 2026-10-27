@@ -8,13 +8,15 @@ const crypto = require("crypto");
 const { Pool } = require("pg");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 const DATABASE_URL = process.env.DATABASE_URL;
-
 const ADMIN_USER_ID = process.env.ADMIN_USER_ID || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY;
+
+const APPLICATIONS_FILE = path.join(__dirname, "applications.json");
+const ACCOUNTS_FILE = path.join(__dirname, "account-details.json");
 
 const pool = DATABASE_URL
   ? new Pool({
@@ -24,8 +26,7 @@ const pool = DATABASE_URL
     })
   : null;
 
-const APPLICATIONS_FILE = path.join(__dirname, "applications.json");
-
+app.disable("x-powered-by");
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -35,45 +36,83 @@ if (!fs.existsSync(APPLICATIONS_FILE)) {
   fs.writeFileSync(APPLICATIONS_FILE, "[]", "utf8");
 }
 
-// -------------------- Helpers --------------------
+// -------------------- File helpers --------------------
 
-function readApplications() {
+function readJsonFile(file, fallback = []) {
   try {
-    const result = JSON.parse(
-      fs.readFileSync(APPLICATIONS_FILE, "utf8")
-    );
-    return Array.isArray(result) ? result : [];
+    const value = JSON.parse(fs.readFileSync(file, "utf8"));
+    return value ?? fallback;
   } catch (error) {
-    console.error("JSON read error:", error.message);
-    return [];
+    console.error("File read error:", error.message);
+    return fallback;
   }
 }
 
-function writeApplications(items) {
-  fs.writeFileSync(
-    APPLICATIONS_FILE,
-    JSON.stringify(items, null, 2),
-    "utf8"
-  );
+function writeJsonFile(file, value) {
+  fs.writeFileSync(file, JSON.stringify(value, null, 2), "utf8");
 }
 
+function readApplications() {
+  const items = readJsonFile(APPLICATIONS_FILE, []);
+  return Array.isArray(items) ? items : [];
+}
+
+function writeApplications(items) {
+  writeJsonFile(APPLICATIONS_FILE, items);
+}
+
+// -------------------- Application helpers --------------------
+
 function getApplication(body) {
+  const root = body && typeof body === "object" ? body : {};
   const source =
-    body && body.application && typeof body.application === "object"
-      ? body.application
-      : body || {};
+    root.application && typeof root.application === "object"
+      ? root.application
+      : root;
 
   return {
     ...source,
-    name: String(source.name || "").trim(),
-    mobile: String(source.mobile || "").trim(),
-    email: String(source.email || source.gmail || "").trim(),
-    state: String(source.state || "").trim(),
-    loan_type: String(
-      source.loan_type || source.loanType || source.loan_type_name || ""
+    name: String(
+      source.name ||
+      source.fullName ||
+      source.full_name ||
+      source.customer_name ||
+      ""
     ).trim(),
-    loan_amount: source.loan_amount ?? source.loanAmount ?? null,
-    monthly_income: source.monthly_income ?? source.monthlyIncome ?? null
+
+    mobile: String(
+      source.mobile ||
+      source.phone ||
+      source.phoneNumber ||
+      source.mobile_number ||
+      ""
+    ).trim(),
+
+    email: String(
+      source.email ||
+      source.gmail ||
+      source.email_address ||
+      ""
+    ).trim(),
+
+    state: String(source.state || "").trim(),
+
+    loan_type: String(
+      source.loan_type ||
+      source.loanType ||
+      source.loan_type_name ||
+      ""
+    ).trim(),
+
+    loan_amount:
+      source.loan_amount ??
+      source.loanAmount ??
+      null,
+
+    monthly_income:
+      source.monthly_income ??
+      source.monthlyIncome ??
+      null
   };
 }
 
@@ -84,34 +123,52 @@ function numericValue(value) {
 
   const number = Number(value);
 
-  if (!Number.isFinite(number) || number < 0) {
-    return null;
-  }
-
-  return number;
+  return Number.isFinite(number) && number >= 0
+    ? number
+    : null;
 }
 
 function normalizeRow(row) {
   const data =
-    row.data && typeof row.data === "object" ? row.data : {};
+    row.data && typeof row.data === "object"
+      ? row.data
+      : {};
 
   return {
     ...data,
-    id: row.id ?? data.id,
+    id: row.id ?? data.id ?? "",
     name: row.name ?? data.name ?? "",
     mobile: row.mobile ?? data.mobile ?? "",
     email: row.email ?? data.email ?? data.gmail ?? "",
     state: row.state ?? data.state ?? "",
-    loan_type: row.loan_type ?? data.loan_type ?? data.loanType ?? "",
-    loan_amount: row.loan_amount ?? data.loan_amount ?? data.loanAmount ?? "",
+    loan_type:
+      row.loan_type ??
+      data.loan_type ??
+      data.loanType ??
+      "",
+    loan_amount:
+      row.loan_amount ??
+      data.loan_amount ??
+      data.loanAmount ??
+      "",
     monthly_income:
-      row.monthly_income ?? data.monthly_income ?? data.monthlyIncome ?? "",
+      row.monthly_income ??
+      data.monthly_income ??
+      data.monthlyIncome ??
+      "",
     status: data.status || "Pending",
+    charges: data.charges ?? "",
     created_at: row.created_at ?? data.created_at ?? null
   };
 }
 
+// -------------------- Admin authentication --------------------
+
 function makeAdminToken() {
+  if (!ADMIN_SECRET_KEY) {
+    throw new Error("ADMIN_SECRET_KEY is not configured.");
+  }
+
   return crypto
     .createHmac("sha256", ADMIN_SECRET_KEY)
     .update("reliance-finance-admin")
@@ -127,7 +184,9 @@ function requireAdmin(req, res, next) {
   }
 
   const cookieHeader = req.headers.cookie || "";
-  const cookieMatch = cookieHeader.match(/(?:^|;\s*)admin_token=([^;]+)/);
+  const cookieMatch = cookieHeader.match(
+    /(?:^|;\s*)admin_token=([^;]+)/
+  );
 
   let cookieToken = "";
 
@@ -171,8 +230,9 @@ function requireAdmin(req, res, next) {
 
 async function setupDatabase() {
   if (!pool) {
-    console.log("DATABASE_URL missing. Using local JSON storage.");
-    return;
+    throw new Error(
+      "DATABASE_URL is missing. Set it in Render Environment."
+    );
   }
 
   await pool.query(`
@@ -190,10 +250,10 @@ async function setupDatabase() {
     )
   `);
 
-  // Add missing columns without deleting existing records.
   await pool.query(`
     ALTER TABLE public.applications
       ADD COLUMN IF NOT EXISTS data JSONB,
+      ADD COLUMN IF NOT EXISTS mobile TEXT,
       ADD COLUMN IF NOT EXISTS email TEXT,
       ADD COLUMN IF NOT EXISTS state TEXT,
       ADD COLUMN IF NOT EXISTS loan_type TEXT,
@@ -203,12 +263,12 @@ async function setupDatabase() {
         DEFAULT CURRENT_TIMESTAMP
   `);
 
-  // Existing records may already have their details inside JSON.
-  // Fill empty structured columns from JSON when possible.
+  // Recover details from JSON in existing rows without deleting them.
   await pool.query(`
     UPDATE public.applications
     SET
-      mobile = COALESCE(NULLIF(mobile, ''), data->>'mobile'),
+      name = COALESCE(NULLIF(name, ''), NULLIF(data->>'name', ''), 'Unknown'),
+      mobile = COALESCE(NULLIF(mobile, ''), data->>'mobile', data->>'phone'),
       email = COALESCE(NULLIF(email, ''), data->>'email', data->>'gmail'),
       state = COALESCE(NULLIF(state, ''), data->>'state'),
       loan_type = COALESCE(
@@ -219,34 +279,30 @@ async function setupDatabase() {
       loan_amount = COALESCE(
         loan_amount,
         CASE
-          WHEN NULLIF(data->>'loan_amount', '') ~ '^[0-9]+(\\.[0-9]+)?$'
-            THEN (data->>'loan_amount')::numeric
-          WHEN NULLIF(data->>'loanAmount', '') ~ '^[0-9]+(\\.[0-9]+)?$'
-            THEN (data->>'loanAmount')::numeric
+          WHEN COALESCE(data->>'loan_amount', data->>'loanAmount', '')
+            ~ '^[0-9]+([.][0-9]+)?$'
+          THEN COALESCE(data->>'loan_amount', data->>'loanAmount')::numeric
           ELSE NULL
         END
       ),
       monthly_income = COALESCE(
         monthly_income,
         CASE
-          WHEN NULLIF(data->>'monthly_income', '') ~ '^[0-9]+(\\.[0-9]+)?$'
-            THEN (data->>'monthly_income')::numeric
-          WHEN NULLIF(data->>'monthlyIncome', '') ~ '^[0-9]+(\\.[0-9]+)?$'
-            THEN (data->>'monthlyIncome')::numeric
+          WHEN COALESCE(data->>'monthly_income', data->>'monthlyIncome', '')
+            ~ '^[0-9]+([.][0-9]+)?$'
+          THEN COALESCE(data->>'monthly_income', data->>'monthlyIncome')::numeric
           ELSE NULL
         END
       )
+    WHERE
+      name IS NULL OR name = ''
+      OR mobile IS NULL OR mobile = ''
+      OR email IS NULL OR email = ''
+      OR state IS NULL OR state = ''
+      OR loan_type IS NULL OR loan_type = ''
+      OR loan_amount IS NULL
+      OR monthly_income IS NULL
   `);
-
-  // Some old rows may have their name only inside the JSON.
-  await pool.query(`
-    UPDATE public.applications
-    SET name = COALESCE(NULLIF(name, ''), data->>'name', 'Unknown')
-    WHERE name IS NULL OR name = ''
-  `);
-
-  // The table may have a NOT NULL name constraint from an older version.
-  // New submissions below always provide a name.
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS public.demo_account (
@@ -257,11 +313,11 @@ async function setupDatabase() {
     )
   `);
 
-  console.log("PostgreSQL database ready");
   await pool.query("SELECT 1");
+  console.log("PostgreSQL database connected.");
 }
 
-// -------------------- Website --------------------
+// -------------------- Website and health --------------------
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
@@ -269,17 +325,26 @@ app.get("/", (req, res) => {
 
 app.get("/health", async (req, res) => {
   try {
-    if (pool) {
-      await pool.query("SELECT 1");
+    if (!pool) {
+      return res.status(503).json({
+        success: false,
+        databaseConfigured: false,
+        message: "DATABASE_URL is missing."
+      });
     }
 
-    res.json({
+    await pool.query("SELECT 1");
+
+    return res.json({
       success: true,
-      databaseConfigured: Boolean(pool)
+      databaseConfigured: true
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Health check error:", error.message);
+
+    return res.status(503).json({
       success: false,
+      databaseConfigured: Boolean(pool),
       message: "Database connection failed."
     });
   }
@@ -291,15 +356,23 @@ app.post("/admin-login", (req, res) => {
   if (!ADMIN_PASSWORD || !ADMIN_SECRET_KEY) {
     return res.status(500).json({
       success: false,
-      message: "Set ADMIN_PASSWORD and ADMIN_SECRET_KEY in environment variables."
+      message:
+        "Set ADMIN_PASSWORD and ADMIN_SECRET_KEY in Render Environment."
     });
   }
 
   const body = req.body || {};
+
   const username =
-    body.username || body.adminUsername || body.userId || "";
+    body.username ||
+    body.adminUsername ||
+    body.userId ||
+    "";
+
   const password =
-    body.password || body.adminPassword || "";
+    body.password ||
+    body.adminPassword ||
+    "";
 
   if (
     username !== ADMIN_USER_ID ||
@@ -312,12 +385,13 @@ app.post("/admin-login", (req, res) => {
   }
 
   const token = makeAdminToken();
-res.setHeader(
-  "Set-Cookie",
-  admin_token=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=28800
-);
 
-  res.json({
+  res.setHeader(
+    "Set-Cookie",
+    admin_token=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=28800
+  );
+
+  return res.json({
     success: true,
     token,
     message: "Admin login successful."
@@ -343,23 +417,23 @@ app.post("/submit-application", async (req, res) => {
       created_at: new Date().toISOString()
     };
 
-    const loanAmount = numericValue(application.loan_amount);
-    const monthlyIncome = numericValue(application.monthly_income);
-
     if (pool) {
+      const loanAmount = numericValue(application.loan_amount);
+      const monthlyIncome = numericValue(application.monthly_income);
+
       const result = await pool.query(
         `
         INSERT INTO public.applications
-        (
-          name,
-          mobile,
-          email,
-          state,
-          loan_type,
-          loan_amount,
-          monthly_income,
-          data
-        )
+          (
+            name,
+            mobile,
+            email,
+            state,
+            loan_type,
+            loan_amount,
+            monthly_income,
+            data
+          )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
         RETURNING id, created_at
         `,
@@ -382,6 +456,7 @@ app.post("/submit-application", async (req, res) => {
       });
     }
 
+    // Local fallback only. Render's local filesystem is not permanent storage.
     const applications = readApplications();
     record.id = Date.now();
     applications.push(record);
@@ -395,9 +470,9 @@ app.post("/submit-application", async (req, res) => {
   } catch (error) {
     console.error("Application save error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Application could not be saved."
+      message: "Application could not be saved. Check server logs."
     });
   }
 });
@@ -426,14 +501,14 @@ app.get("/applications", requireAdmin, async (req, res) => {
   } catch (error) {
     console.error("Applications fetch error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Could not load applications."
     });
   }
 });
 
-// -------------------- Check application --------------------
+// -------------------- Check application by mobile --------------------
 
 app.get("/check-application", async (req, res) => {
   try {
@@ -486,18 +561,21 @@ app.get("/check-application", async (req, res) => {
       });
     }
 
-    return res.json({ success: true, application: found });
+    return res.json({
+      success: true,
+      application: found
+    });
   } catch (error) {
     console.error("Application status error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Could not check application."
     });
   }
 });
 
-// -------------------- Update status (Admin) --------------------
+// -------------------- Update application status (Admin) --------------------
 
 app.post("/update-status", requireAdmin, async (req, res) => {
   try {
@@ -511,19 +589,38 @@ app.post("/update-status", requireAdmin, async (req, res) => {
     }
 
     if (pool) {
-      const result = await pool.query(
-        `
-        UPDATE public.applications
-        SET data = COALESCE(data, '{}'::jsonb)
-                   || jsonb_build_object('status', $1::text)
-        WHERE
-          ($2::bigint IS NOT NULL AND id = $2::bigint)
-          OR
-          ($2::bigint IS NULL AND mobile = $3)
-        RETURNING id
-        `,
-        [String(status), id || null, mobile || null]
-      );
+      let result;
+
+      if (id) {
+        if (!/^[0-9]+$/.test(String(id))) {
+          return res.status(400).json({
+            success: false,
+            message: "Invalid application id."
+          });
+        }
+
+        result = await pool.query(
+          `
+          UPDATE public.applications
+          SET data = COALESCE(data, '{}'::jsonb)
+                     || jsonb_build_object('status', $1::text)
+          WHERE id = $2::bigint
+          RETURNING id
+          `,
+          [String(status), String(id)]
+        );
+      } else {
+        result = await pool.query(
+          `
+          UPDATE public.applications
+          SET data = COALESCE(data, '{}'::jsonb)
+                     || jsonb_build_object('status', $1::text)
+          WHERE mobile = $2
+          RETURNING id
+          `,
+          [String(status), String(mobile)]
+        );
+      }
 
       if (!result.rowCount) {
         return res.status(404).json({
@@ -533,6 +630,7 @@ app.post("/update-status", requireAdmin, async (req, res) => {
       }
     } else {
       const items = readApplications();
+
       const index = items.findIndex(item =>
         id
           ? String(item.id) === String(id)
@@ -550,11 +648,14 @@ app.post("/update-status", requireAdmin, async (req, res) => {
       writeApplications(items);
     }
 
-    res.json({ success: true, message: "Status updated." });
+    return res.json({
+      success: true,
+      message: "Status updated."
+    });
   } catch (error) {
     console.error("Status update error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Could not update status."
     });
@@ -567,7 +668,11 @@ app.post("/update-charges", requireAdmin, async (req, res) => {
   try {
     const { id, mobile, charges } = req.body || {};
 
-    if ((!id && !mobile) || charges === undefined || charges === null) {
+    if (
+      (!id && !mobile) ||
+      charges === undefined ||
+      charges === null
+    ) {
       return res.status(400).json({
         success: false,
         message: "Application id/mobile and charges are required."
@@ -575,19 +680,38 @@ app.post("/update-charges", requireAdmin, async (req, res) => {
     }
 
     if (pool) {
-      const result = await pool.query(
-        `
-        UPDATE public.applications
-        SET data = COALESCE(data, '{}'::jsonb)
-                   || jsonb_build_object('charges', $1::text)
-        WHERE
-          ($2::bigint IS NOT NULL AND id = $2::bigint)
-          OR
-          ($2::bigint IS NULL AND mobile = $3)
-        RETURNING id
-        `,
-        [String(charges), id || null, mobile || null]
-      );
+      let result;
+
+      if (id) {
+        if (!/^[0-9]+$/.test(String(id))) {
+          return res.status(400).json({
+            success: false,
+            message: "Invalid application id."
+          });
+        }
+
+        result = await pool.query(
+          `
+          UPDATE public.applications
+          SET data = COALESCE(data, '{}'::jsonb)
+                     || jsonb_build_object('charges', $1::text)
+          WHERE id = $2::bigint
+          RETURNING id
+          `,
+          [String(charges), String(id)]
+        );
+      } else {
+        result = await pool.query(
+          `
+          UPDATE public.applications
+          SET data = COALESCE(data, '{}'::jsonb)
+                     || jsonb_build_object('charges', $1::text)
+          WHERE mobile = $2
+          RETURNING id
+          `,
+          [String(charges), String(mobile)]
+        );
+      }
 
       if (!result.rowCount) {
         return res.status(404).json({
@@ -597,6 +721,7 @@ app.post("/update-charges", requireAdmin, async (req, res) => {
       }
     } else {
       const items = readApplications();
+
       const index = items.findIndex(item =>
         id
           ? String(item.id) === String(id)
@@ -614,11 +739,14 @@ app.post("/update-charges", requireAdmin, async (req, res) => {
       writeApplications(items);
     }
 
-    res.json({ success: true, message: "Charges updated." });
+    return res.json({
+      success: true,
+      message: "Charges updated."
+    });
   } catch (error) {
     console.error("Charges update error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Could not update charges."
     });
@@ -644,7 +772,8 @@ app.post("/save-account-details", async (req, res) => {
     if (pool) {
       await pool.query(
         `
-        INSERT INTO public.demo_account (mobile, data, updated_at)
+        INSERT INTO public.demo_account
+          (mobile, data, updated_at)
         VALUES ($1, $2::jsonb, CURRENT_TIMESTAMP)
         ON CONFLICT (mobile)
         DO UPDATE SET
@@ -654,17 +783,7 @@ app.post("/save-account-details", async (req, res) => {
         [mobile, JSON.stringify(accountData)]
       );
     } else {
-      const file = path.join(__dirname, "account-details.json");
-      let accounts = [];
-
-      if (fs.existsSync(file)) {
-        try {
-          accounts = JSON.parse(fs.readFileSync(file, "utf8"));
-        } catch (_) {
-          accounts = [];
-        }
-      }
-
+      const accounts = readJsonFile(ACCOUNTS_FILE, []);
       const index = accounts.findIndex(
         item => String(item.mobile) === mobile
       );
@@ -675,17 +794,17 @@ app.post("/save-account-details", async (req, res) => {
         accounts.push(accountData);
       }
 
-      fs.writeFileSync(file, JSON.stringify(accounts, null, 2));
+      writeJsonFile(ACCOUNTS_FILE, accounts);
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: "Account details saved."
     });
   } catch (error) {
     console.error("Account save error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Could not save account details."
     });
@@ -724,11 +843,7 @@ app.get("/account-details", async (req, res) => {
       });
     }
 
-    const file = path.join(__dirname, "account-details.json");
-    const accounts = fs.existsSync(file)
-      ? JSON.parse(fs.readFileSync(file, "utf8"))
-      : [];
-
+    const accounts = readJsonFile(ACCOUNTS_FILE, []);
     const account = accounts.find(
       item => String(item.mobile) === mobile
     );
@@ -740,11 +855,14 @@ app.get("/account-details", async (req, res) => {
       });
     }
 
-    res.json({ success: true, account });
+    return res.json({
+      success: true,
+      account
+    });
   } catch (error) {
     console.error("Account fetch error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Could not load account details."
     });
@@ -807,11 +925,11 @@ app.get("/download-csv", requireAdmin, async (req, res) => {
       'attachment; filename="reliance-finance-applications.csv"'
     );
 
-    res.send("\uFEFF" + csv);
+    return res.send("\uFEFF" + csv);
   } catch (error) {
     console.error("CSV download error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Could not download CSV."
     });
@@ -821,20 +939,16 @@ app.get("/download-csv", requireAdmin, async (req, res) => {
 // -------------------- Start server --------------------
 
 async function startServer() {
-  if (pool) {
-    try {
-      await setupDatabase();
-    } catch (error) {
-      console.error("DATABASE SETUP ERROR:", error.message);
-      process.exitCode = 1;
-      await pool.end().catch(() => {});
-      process.exit(1);
-    }
-  }
+  try {
+    await setupDatabase();
 
-  app.listen(PORT, "0.0.0.0", () => {
-  console.log(Reliance Finance server running on port ${PORT});
-  });
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(Reliance Finance server running on port ${PORT});
+    });
+  } catch (error) {
+    console.error("SERVER STARTUP FAILED:", error.message);
+    process.exit(1);
+  }
 }
 
 startServer();
