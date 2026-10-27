@@ -10,107 +10,168 @@ const { Pool } = require("pg");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json({ limit: "1mb" }));
-app.use(express.urlencoded({ extended: true }));
-
-app.use(express.static(__dirname));
+const DATABASE_URL = process.env.DATABASE_URL;
 
 const ADMIN_USER_ID = process.env.ADMIN_USER_ID || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY;
 
-const DATABASE_URL = process.env.DATABASE_URL;
-
 const pool = DATABASE_URL
   ? new Pool({
       connectionString: DATABASE_URL,
       ssl: { rejectUnauthorized: false },
-      connectionTimeoutMillis: 15000,
-      idleTimeoutMillis: 30000
+      connectionTimeoutMillis: 15000
     })
   : null;
 
-const DATA_FILE = path.join(__dirname, "applications.json");
+const APPLICATIONS_FILE = path.join(__dirname, "applications.json");
 
-if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, "[]", "utf8");
+app.use(cors());
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
+
+if (!fs.existsSync(APPLICATIONS_FILE)) {
+  fs.writeFileSync(APPLICATIONS_FILE, "[]", "utf8");
 }
 
-function readLocalApplications() {
+// -------------------- Helpers --------------------
+
+function readApplications() {
   try {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-    return Array.isArray(data) ? data : [];
+    const result = JSON.parse(
+      fs.readFileSync(APPLICATIONS_FILE, "utf8")
+    );
+    return Array.isArray(result) ? result : [];
   } catch (error) {
-    console.error("Local data read error:", error.message);
+    console.error("JSON read error:", error.message);
     return [];
   }
 }
 
-function writeLocalApplications(applications) {
+function writeApplications(items) {
   fs.writeFileSync(
-    DATA_FILE,
-    JSON.stringify(applications, null, 2),
+    APPLICATIONS_FILE,
+    JSON.stringify(items, null, 2),
     "utf8"
   );
 }
 
-function normalizeApplication(row) {
+function getApplication(body) {
+  const source =
+    body && body.application && typeof body.application === "object"
+      ? body.application
+      : body || {};
+
+  return {
+    ...source,
+    name: String(source.name || "").trim(),
+    mobile: String(source.mobile || "").trim(),
+    email: String(source.email || source.gmail || "").trim(),
+    state: String(source.state || "").trim(),
+    loan_type: String(
+      source.loan_type || source.loanType || source.loan_type_name || ""
+    ).trim(),
+    loan_amount: source.loan_amount ?? source.loanAmount ?? null,
+    monthly_income: source.monthly_income ?? source.monthlyIncome ?? null
+  };
+}
+
+function numericValue(value) {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  const number = Number(value);
+
+  if (!Number.isFinite(number) || number < 0) {
+    return null;
+  }
+
+  return number;
+}
+
+function normalizeRow(row) {
   const data =
-    row && row.data && typeof row.data === "object"
-      ? row.data
-      : {};
+    row.data && typeof row.data === "object" ? row.data : {};
 
   return {
     ...data,
     id: row.id ?? data.id,
     name: row.name ?? data.name ?? "",
     mobile: row.mobile ?? data.mobile ?? "",
-    email: row.email ?? data.email ?? "",
+    email: row.email ?? data.email ?? data.gmail ?? "",
     state: row.state ?? data.state ?? "",
-    loan_type: row.loan_type ?? data.loan_type ?? "",
-    loan_amount: row.loan_amount ?? data.loan_amount ?? "",
+    loan_type: row.loan_type ?? data.loan_type ?? data.loanType ?? "",
+    loan_amount: row.loan_amount ?? data.loan_amount ?? data.loanAmount ?? "",
     monthly_income:
-      row.monthly_income ?? data.monthly_income ?? "",
-    status: data.status ?? "Pending",
+      row.monthly_income ?? data.monthly_income ?? data.monthlyIncome ?? "",
+    status: data.status || "Pending",
     created_at: row.created_at ?? data.created_at ?? null
   };
 }
 
-function requireAdmin(req, res, next) {
-  const token = req.headers["x-admin-token"];
-
-  if (!token || !ADMIN_SECRET_KEY) {
-    return res.status(401).json({
-      success: false,
-      message: "Admin login required"
-    });
-  }
-
-  const expected = crypto
+function makeAdminToken() {
+  return crypto
     .createHmac("sha256", ADMIN_SECRET_KEY)
     .update("reliance-finance-admin")
     .digest("hex");
+}
 
-  const actualBuffer = Buffer.from(String(token));
-  const expectedBuffer = Buffer.from(expected);
+function requireAdmin(req, res, next) {
+  if (!ADMIN_SECRET_KEY) {
+    return res.status(500).json({
+      success: false,
+      message: "ADMIN_SECRET_KEY is not configured."
+    });
+  }
+
+  const cookieHeader = req.headers.cookie || "";
+  const cookieMatch = cookieHeader.match(/(?:^|;\s*)admin_token=([^;]+)/);
+
+  let cookieToken = "";
+
+  if (cookieMatch) {
+    try {
+      cookieToken = decodeURIComponent(cookieMatch[1]);
+    } catch (_) {
+      cookieToken = "";
+    }
+  }
+
+  const suppliedToken =
+    req.headers["x-admin-token"] || cookieToken;
+
+  const expectedToken = makeAdminToken();
 
   if (
-    actualBuffer.length !== expectedBuffer.length ||
-    !crypto.timingSafeEqual(actualBuffer, expectedBuffer)
+    typeof suppliedToken !== "string" ||
+    suppliedToken.length !== expectedToken.length
   ) {
     return res.status(401).json({
       success: false,
-      message: "Invalid admin token"
+      message: "Please login as admin."
+    });
+  }
+
+  const supplied = Buffer.from(suppliedToken);
+  const expected = Buffer.from(expectedToken);
+
+  if (!crypto.timingSafeEqual(supplied, expected)) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid admin login."
     });
   }
 
   next();
 }
 
+// -------------------- Database setup --------------------
+
 async function setupDatabase() {
   if (!pool) {
-    console.log("DATABASE_URL missing; using local JSON storage.");
+    console.log("DATABASE_URL missing. Using local JSON storage.");
     return;
   }
 
@@ -118,13 +179,13 @@ async function setupDatabase() {
     CREATE TABLE IF NOT EXISTS public.applications (
       id BIGSERIAL PRIMARY KEY,
       created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-      name TEXT,
+      name TEXT NOT NULL,
       mobile TEXT,
       email TEXT,
       state TEXT,
       loan_type TEXT,
-      loan_amount TEXT,
-      monthly_income TEXT,
+      loan_amount NUMERIC,
+      monthly_income NUMERIC,
       data JSONB
     )
   `);
@@ -132,27 +193,100 @@ async function setupDatabase() {
   // Add missing columns without deleting existing records.
   await pool.query(`
     ALTER TABLE public.applications
-      ADD COLUMN IF NOT EXISTS name TEXT,
-      ADD COLUMN IF NOT EXISTS mobile TEXT,
+      ADD COLUMN IF NOT EXISTS data JSONB,
       ADD COLUMN IF NOT EXISTS email TEXT,
       ADD COLUMN IF NOT EXISTS state TEXT,
       ADD COLUMN IF NOT EXISTS loan_type TEXT,
-      ADD COLUMN IF NOT EXISTS loan_amount TEXT,
-      ADD COLUMN IF NOT EXISTS monthly_income TEXT,
-      ADD COLUMN IF NOT EXISTS data JSONB,
-      ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      ADD COLUMN IF NOT EXISTS loan_amount NUMERIC,
+      ADD COLUMN IF NOT EXISTS monthly_income NUMERIC,
+      ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ
+        DEFAULT CURRENT_TIMESTAMP
   `);
 
-  console.log("Supabase PostgreSQL connection configured.");
+  // Existing records may already have their details inside JSON.
+  // Fill empty structured columns from JSON when possible.
+  await pool.query(`
+    UPDATE public.applications
+    SET
+      mobile = COALESCE(NULLIF(mobile, ''), data->>'mobile'),
+      email = COALESCE(NULLIF(email, ''), data->>'email', data->>'gmail'),
+      state = COALESCE(NULLIF(state, ''), data->>'state'),
+      loan_type = COALESCE(
+        NULLIF(loan_type, ''),
+        data->>'loan_type',
+        data->>'loanType'
+      ),
+      loan_amount = COALESCE(
+        loan_amount,
+        CASE
+          WHEN NULLIF(data->>'loan_amount', '') ~ '^[0-9]+(\\.[0-9]+)?$'
+            THEN (data->>'loan_amount')::numeric
+          WHEN NULLIF(data->>'loanAmount', '') ~ '^[0-9]+(\\.[0-9]+)?$'
+            THEN (data->>'loanAmount')::numeric
+          ELSE NULL
+        END
+      ),
+      monthly_income = COALESCE(
+        monthly_income,
+        CASE
+          WHEN NULLIF(data->>'monthly_income', '') ~ '^[0-9]+(\\.[0-9]+)?$'
+            THEN (data->>'monthly_income')::numeric
+          WHEN NULLIF(data->>'monthlyIncome', '') ~ '^[0-9]+(\\.[0-9]+)?$'
+            THEN (data->>'monthlyIncome')::numeric
+          ELSE NULL
+        END
+      )
+  `);
+
+  // Some old rows may have their name only inside the JSON.
+  await pool.query(`
+    UPDATE public.applications
+    SET name = COALESCE(NULLIF(name, ''), data->>'name', 'Unknown')
+    WHERE name IS NULL OR name = ''
+  `);
+
+  // The table may have a NOT NULL name constraint from an older version.
+  // New submissions below always provide a name.
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS public.demo_account (
+      id BIGSERIAL PRIMARY KEY,
+      mobile TEXT UNIQUE NOT NULL,
+      data JSONB NOT NULL DEFAULT '{}'::jsonb,
+      updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  console.log("PostgreSQL database ready");
   await pool.query("SELECT 1");
-  console.log("Database connection successful.");
 }
+
+// -------------------- Website --------------------
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// Admin login
+app.get("/health", async (req, res) => {
+  try {
+    if (pool) {
+      await pool.query("SELECT 1");
+    }
+
+    res.json({
+      success: true,
+      databaseConfigured: Boolean(pool)
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Database connection failed."
+    });
+  }
+});
+
+// -------------------- Admin login --------------------
+
 app.post("/admin-login", (req, res) => {
   if (!ADMIN_PASSWORD || !ADMIN_SECRET_KEY) {
     return res.status(500).json({
@@ -161,7 +295,11 @@ app.post("/admin-login", (req, res) => {
     });
   }
 
-  const { username, password } = req.body || {};
+  const body = req.body || {};
+  const username =
+    body.username || body.adminUsername || body.userId || "";
+  const password =
+    body.password || body.adminPassword || "";
 
   if (
     username !== ADMIN_USER_ID ||
@@ -169,31 +307,31 @@ app.post("/admin-login", (req, res) => {
   ) {
     return res.status(401).json({
       success: false,
-      message: "Wrong username or password"
+      message: "Wrong username or password."
     });
   }
 
-  const token = crypto
-    .createHmac("sha256", ADMIN_SECRET_KEY)
-    .update("reliance-finance-admin")
-    .digest("hex");
+  const token = makeAdminToken();
+
+  res.setHeader(
+    "Set-Cookie",
+    admin_token=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=28800
+  );
 
   res.json({
     success: true,
     token,
-    message: "Login successful"
+    message: "Admin login successful."
   });
 });
 
-// Submit a new loan application
+// -------------------- Submit application --------------------
+
 app.post("/submit-application", async (req, res) => {
   try {
-    const application = req.body || {};
+    const application = getApplication(req.body);
 
-    const name = String(application.name || "").trim();
-    const mobile = String(application.mobile || "").trim();
-
-    if (!name || !mobile) {
+    if (!application.name || !application.mobile) {
       return res.status(400).json({
         success: false,
         message: "Name and mobile number are required."
@@ -202,38 +340,38 @@ app.post("/submit-application", async (req, res) => {
 
     const record = {
       ...application,
-      name,
-      mobile,
-      email: String(application.email || application.gmail || "").trim(),
-      state: String(application.state || "").trim(),
-      loan_type: String(
-        application.loan_type || application.loanType || ""
-      ).trim(),
-      loan_amount: String(
-        application.loan_amount || application.loanAmount || ""
-      ).trim(),
-      monthly_income: String(
-        application.monthly_income || application.monthlyIncome || ""
-      ).trim(),
-      status: "Pending",
+      status: application.status || "Pending",
       created_at: new Date().toISOString()
     };
 
+    const loanAmount = numericValue(application.loan_amount);
+    const monthlyIncome = numericValue(application.monthly_income);
+
     if (pool) {
       const result = await pool.query(
-        `INSERT INTO public.applications
-          (name, mobile, email, state, loan_type,
-           loan_amount, monthly_income, data)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
-         RETURNING id, created_at`,
+        `
+        INSERT INTO public.applications
+        (
+          name,
+          mobile,
+          email,
+          state,
+          loan_type,
+          loan_amount,
+          monthly_income,
+          data
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
+        RETURNING id, created_at
+        `,
         [
           record.name,
           record.mobile,
           record.email,
           record.state,
           record.loan_type,
-          record.loan_amount,
-          record.monthly_income,
+          loanAmount,
+          monthlyIncome,
           JSON.stringify(record)
         ]
       );
@@ -245,10 +383,10 @@ app.post("/submit-application", async (req, res) => {
       });
     }
 
-    const applications = readLocalApplications();
+    const applications = readApplications();
     record.id = Date.now();
     applications.push(record);
-    writeLocalApplications(applications);
+    writeApplications(applications);
 
     return res.json({
       success: true,
@@ -256,34 +394,39 @@ app.post("/submit-application", async (req, res) => {
       id: record.id
     });
   } catch (error) {
-    console.error("Application submission error:", error.message);
-    return res.status(500).json({
+    console.error("Application save error:", error.message);
+
+    res.status(500).json({
       success: false,
-      message: "Application could not be saved. Please try again."
+      message: "Application could not be saved."
     });
   }
 });
 
-// Admin: get all applications
+// -------------------- Get all applications (Admin) --------------------
+
 app.get("/applications", requireAdmin, async (req, res) => {
   try {
     if (pool) {
-      const result = await pool.query(
-        "SELECT * FROM public.applications ORDER BY created_at DESC NULLS LAST, id DESC"
-      );
+      const result = await pool.query(`
+        SELECT *
+        FROM public.applications
+        ORDER BY created_at DESC NULLS LAST, id DESC
+      `);
 
-      return res.json(result.rows.map(normalizeApplication));
+      return res.json(result.rows.map(normalizeRow));
     }
 
     return res.json(
-      readLocalApplications().sort(
+      readApplications().sort(
         (a, b) =>
           new Date(b.created_at || 0) -
           new Date(a.created_at || 0)
       )
     );
   } catch (error) {
-    console.error("Fetch applications error:", error.message);
+    console.error("Applications fetch error:", error.message);
+
     res.status(500).json({
       success: false,
       message: "Could not load applications."
@@ -291,7 +434,8 @@ app.get("/applications", requireAdmin, async (req, res) => {
   }
 });
 
-// Check application status using mobile number
+// -------------------- Check application --------------------
+
 app.get("/check-application", async (req, res) => {
   try {
     const mobile = String(req.query.mobile || "").trim();
@@ -305,10 +449,13 @@ app.get("/check-application", async (req, res) => {
 
     if (pool) {
       const result = await pool.query(
-        `SELECT * FROM public.applications
-         WHERE mobile = $1
-         ORDER BY created_at DESC NULLS LAST, id DESC
-         LIMIT 1`,
+        `
+        SELECT *
+        FROM public.applications
+        WHERE mobile = $1
+        ORDER BY created_at DESC NULLS LAST, id DESC
+        LIMIT 1
+        `,
         [mobile]
       );
 
@@ -321,11 +468,11 @@ app.get("/check-application", async (req, res) => {
 
       return res.json({
         success: true,
-        application: normalizeApplication(result.rows[0])
+        application: normalizeRow(result.rows[0])
       });
     }
 
-    const application = readLocalApplications()
+    const found = readApplications()
       .filter(item => String(item.mobile) === mobile)
       .sort(
         (a, b) =>
@@ -333,49 +480,49 @@ app.get("/check-application", async (req, res) => {
           new Date(a.created_at || 0)
       )[0];
 
-    if (!application) {
+    if (!found) {
       return res.status(404).json({
         success: false,
         message: "Application not found."
       });
     }
 
-    return res.json({ success: true, application });
+    return res.json({ success: true, application: found });
   } catch (error) {
-    console.error("Status check error:", error.message);
+    console.error("Application status error:", error.message);
+
     res.status(500).json({
       success: false,
-      message: "Could not check application status."
+      message: "Could not check application."
     });
   }
 });
 
-// Admin: update application status
+// -------------------- Update status (Admin) --------------------
+
 app.post("/update-status", requireAdmin, async (req, res) => {
   try {
     const { id, mobile, status } = req.body || {};
 
-    if (!id && !mobile) {
+    if ((!id && !mobile) || !status) {
       return res.status(400).json({
         success: false,
-        message: "Application id or mobile is required."
-      });
-    }
-
-    if (!status) {
-      return res.status(400).json({
-        success: false,
-        message: "Status is required."
+        message: "Application id/mobile and status are required."
       });
     }
 
     if (pool) {
       const result = await pool.query(
-        `UPDATE public.applications
-         SET data = COALESCE(data, '{}'::jsonb)
-                    || jsonb_build_object('status', $1::text)
-         WHERE id = $2 OR ($2 IS NULL AND mobile = $3)
-         RETURNING id`,
+        `
+        UPDATE public.applications
+        SET data = COALESCE(data, '{}'::jsonb)
+                   || jsonb_build_object('status', $1::text)
+        WHERE
+          ($2::bigint IS NOT NULL AND id = $2::bigint)
+          OR
+          ($2::bigint IS NULL AND mobile = $3)
+        RETURNING id
+        `,
         [String(status), id || null, mobile || null]
       );
 
@@ -386,26 +533,28 @@ app.post("/update-status", requireAdmin, async (req, res) => {
         });
       }
     } else {
-      const applications = readLocalApplications();
-      const index = applications.findIndex(item =>
-        id ? String(item.id) === String(id) :
-        String(item.mobile) === String(mobile)
+      const items = readApplications();
+      const index = items.findIndex(item =>
+        id
+          ? String(item.id) === String(id)
+          : String(item.mobile) === String(mobile)
       );
 
-      if (index === -1) {
+      if (index < 0) {
         return res.status(404).json({
           success: false,
           message: "Application not found."
         });
       }
 
-      applications[index].status = String(status);
-      writeLocalApplications(applications);
+      items[index].status = String(status);
+      writeApplications(items);
     }
 
     res.json({ success: true, message: "Status updated." });
   } catch (error) {
-    console.error("Update status error:", error.message);
+    console.error("Status update error:", error.message);
+
     res.status(500).json({
       success: false,
       message: "Could not update status."
@@ -413,32 +562,31 @@ app.post("/update-status", requireAdmin, async (req, res) => {
   }
 });
 
-// Admin: update charges
+// -------------------- Update charges (Admin) --------------------
+
 app.post("/update-charges", requireAdmin, async (req, res) => {
   try {
     const { id, mobile, charges } = req.body || {};
 
-    if (!id && !mobile) {
+    if ((!id && !mobile) || charges === undefined || charges === null) {
       return res.status(400).json({
         success: false,
-        message: "Application id or mobile is required."
-      });
-    }
-
-    if (charges === undefined || charges === null) {
-      return res.status(400).json({
-        success: false,
-        message: "Charges are required."
+        message: "Application id/mobile and charges are required."
       });
     }
 
     if (pool) {
       const result = await pool.query(
-        `UPDATE public.applications
-         SET data = COALESCE(data, '{}'::jsonb)
-                    || jsonb_build_object('charges', $1::text)
-         WHERE id = $2 OR ($2 IS NULL AND mobile = $3)
-         RETURNING id`,
+        `
+        UPDATE public.applications
+        SET data = COALESCE(data, '{}'::jsonb)
+                   || jsonb_build_object('charges', $1::text)
+        WHERE
+          ($2::bigint IS NOT NULL AND id = $2::bigint)
+          OR
+          ($2::bigint IS NULL AND mobile = $3)
+        RETURNING id
+        `,
         [String(charges), id || null, mobile || null]
       );
 
@@ -449,26 +597,28 @@ app.post("/update-charges", requireAdmin, async (req, res) => {
         });
       }
     } else {
-      const applications = readLocalApplications();
-      const index = applications.findIndex(item =>
-        id ? String(item.id) === String(id) :
-        String(item.mobile) === String(mobile)
+      const items = readApplications();
+      const index = items.findIndex(item =>
+        id
+          ? String(item.id) === String(id)
+          : String(item.mobile) === String(mobile)
       );
 
-      if (index === -1) {
+      if (index < 0) {
         return res.status(404).json({
           success: false,
           message: "Application not found."
         });
       }
 
-      applications[index].charges = String(charges);
-      writeLocalApplications(applications);
+      items[index].charges = String(charges);
+      writeApplications(items);
     }
 
     res.json({ success: true, message: "Charges updated." });
   } catch (error) {
-    console.error("Update charges error:", error.message);
+    console.error("Charges update error:", error.message);
+
     res.status(500).json({
       success: false,
       message: "Could not update charges."
@@ -476,36 +626,179 @@ app.post("/update-charges", requireAdmin, async (req, res) => {
   }
 });
 
-// Export applications as CSV for admin
+// -------------------- Save account details --------------------
+
+app.post("/save-account-details", async (req, res) => {
+  try {
+    const body = req.body || {};
+    const mobile = String(body.mobile || "").trim();
+
+    if (!mobile) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number is required."
+      });
+    }
+
+    const accountData = { ...body, mobile };
+
+    if (pool) {
+      await pool.query(
+        `
+        INSERT INTO public.demo_account (mobile, data, updated_at)
+        VALUES ($1, $2::jsonb, CURRENT_TIMESTAMP)
+        ON CONFLICT (mobile)
+        DO UPDATE SET
+          data = EXCLUDED.data,
+          updated_at = CURRENT_TIMESTAMP
+        `,
+        [mobile, JSON.stringify(accountData)]
+      );
+    } else {
+      const file = path.join(__dirname, "account-details.json");
+      let accounts = [];
+
+      if (fs.existsSync(file)) {
+        try {
+          accounts = JSON.parse(fs.readFileSync(file, "utf8"));
+        } catch (_) {
+          accounts = [];
+        }
+      }
+
+      const index = accounts.findIndex(
+        item => String(item.mobile) === mobile
+      );
+
+      if (index >= 0) {
+        accounts[index] = accountData;
+      } else {
+        accounts.push(accountData);
+      }
+
+      fs.writeFileSync(file, JSON.stringify(accounts, null, 2));
+    }
+
+    res.json({
+      success: true,
+      message: "Account details saved."
+    });
+  } catch (error) {
+    console.error("Account save error:", error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Could not save account details."
+    });
+  }
+});
+
+// -------------------- Get account details --------------------
+
+app.get("/account-details", async (req, res) => {
+  try {
+    const mobile = String(req.query.mobile || "").trim();
+
+    if (!mobile) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number is required."
+      });
+    }
+
+    if (pool) {
+      const result = await pool.query(
+        "SELECT data FROM public.demo_account WHERE mobile = $1 LIMIT 1",
+        [mobile]
+      );
+
+      if (!result.rows.length) {
+        return res.status(404).json({
+          success: false,
+          message: "Account details not found."
+        });
+      }
+
+      return res.json({
+        success: true,
+        account: result.rows[0].data
+      });
+    }
+
+    const file = path.join(__dirname, "account-details.json");
+    const accounts = fs.existsSync(file)
+      ? JSON.parse(fs.readFileSync(file, "utf8"))
+      : [];
+
+    const account = accounts.find(
+      item => String(item.mobile) === mobile
+    );
+
+    if (!account) {
+      return res.status(404).json({
+        success: false,
+        message: "Account details not found."
+      });
+    }
+
+    res.json({ success: true, account });
+  } catch (error) {
+    console.error("Account fetch error:", error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Could not load account details."
+    });
+  }
+});
+
+// -------------------- Download CSV (Admin) --------------------
+
 app.get("/download-csv", requireAdmin, async (req, res) => {
   try {
     let applications;
 
     if (pool) {
-      const result = await pool.query(
-        "SELECT * FROM public.applications ORDER BY created_at DESC NULLS LAST, id DESC"
-      );
-      applications = result.rows.map(normalizeApplication);
+      const result = await pool.query(`
+        SELECT *
+        FROM public.applications
+        ORDER BY created_at DESC NULLS LAST, id DESC
+      `);
+
+      applications = result.rows.map(normalizeRow);
     } else {
-      applications = readLocalApplications();
+      applications = readApplications();
     }
 
     const columns = [
-      "id", "name", "mobile", "email", "state",
-      "loan_type", "loan_amount", "monthly_income",
-      "status", "charges", "created_at"
+      "id",
+      "name",
+      "mobile",
+      "email",
+      "state",
+      "loan_type",
+      "loan_amount",
+      "monthly_income",
+      "status",
+      "charges",
+      "created_at"
     ];
 
-    const escapeCsv = value => {
+    function csvCell(value) {
       let text = String(value ?? "");
-      if (/^[=+\-@\t\r]/.test(text)) text = "'" + text;
+
+      // Prevent spreadsheet formula injection.
+      if (/^[=+\-@\t\r]/.test(text)) {
+        text = "'" + text;
+      }
+
       return '"' + text.replace(/"/g, '""') + '"';
-    };
+    }
 
     const csv = [
       columns.join(","),
       ...applications.map(item =>
-        columns.map(column => escapeCsv(item[column])).join(",")
+        columns.map(column => csvCell(item[column])).join(",")
       )
     ].join("\r\n");
 
@@ -514,35 +807,33 @@ app.get("/download-csv", requireAdmin, async (req, res) => {
       "Content-Disposition",
       'attachment; filename="reliance-finance-applications.csv"'
     );
+
     res.send("\uFEFF" + csv);
   } catch (error) {
-    console.error("CSV export error:", error.message);
+    console.error("CSV download error:", error.message);
+
     res.status(500).json({
       success: false,
-      message: "Could not export applications."
+      message: "Could not download CSV."
     });
   }
 });
 
-// Health check
-app.get("/health", (req, res) => {
-  res.json({
-    success: true,
-    databaseConfigured: Boolean(pool)
-  });
-});
+// -------------------- Start server --------------------
 
 async function startServer() {
-  try {
-    await setupDatabase();
-  } catch (error) {
-    console.error("DATABASE SETUP FAILED:", error.message);
-    console.error(
-      "Check DATABASE_URL, database credentials, and table schema."
-    );
+  if (pool) {
+    try {
+      await setupDatabase();
+    } catch (error) {
+      console.error("DATABASE SETUP ERROR:", error.message);
+      process.exitCode = 1;
+      await pool.end().catch(() => {});
+      process.exit(1);
+    }
   }
 
-  app.listen(PORT, () => {
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(Reliance Finance server running on port ${PORT});
   });
 }
