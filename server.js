@@ -833,7 +833,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(Reliance Finance server running on port ${PORT});
+  console.log(Reliance Finance server running on port ${PORT});
   });
 }
 
